@@ -41,13 +41,13 @@ class MyServer(BaseHTTPRequestHandler):
         currentCommandJson = endpoints[capabilities[command]]
         if "args" in currentCommandJson.keys():
             for arg in args:
-                (var , value) = arg.split("=")
+                (var, value) = arg.split("=")
                 currentCommandJson['args'][var] = value
 
             endpoints[capabilities[command]] = currentCommandJson
             data["endpoints"] = endpoints
 
-            fd = open(supportedJson, "w" )
+            fd = open(supportedJson, "w")
             toFile = json.dumps(data, indent=4)
             fd.write(toFile)
             fd.close()
