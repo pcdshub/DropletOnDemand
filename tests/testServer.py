@@ -5,7 +5,7 @@ import json
 
 hostName = "localhost"
 serverPort = 8081
-supportedJson = 'supported.json'
+supportedJson = '../supported.json'
 
 
 class MyServer(BaseHTTPRequestHandler):
@@ -19,15 +19,13 @@ class MyServer(BaseHTTPRequestHandler):
         print(command, args)
 
         # Check if command exists
-        fd = open(supportedJson, "r" )
+        fd = open(supportedJson, "r")
         data = json.load(fd)
-
-
         endpoints = data["endpoints"]
         capabilities = dict()
 
         endpointIndex = 0
-        for endpoint in  endpoints:
+        for endpoint in endpoints:
             capabilities[endpoint["API"]] = endpointIndex
             endpointIndex = endpointIndex + 1
 
@@ -39,7 +37,6 @@ class MyServer(BaseHTTPRequestHandler):
 
         fd.close()
 
-
         # Udate JSON File IF we have Inputs
         currentCommandJson = endpoints[capabilities[command]]
         if "args" in currentCommandJson.keys():
@@ -50,26 +47,24 @@ class MyServer(BaseHTTPRequestHandler):
             endpoints[capabilities[command]] = currentCommandJson
             data["endpoints"] = endpoints
 
-
             fd = open(supportedJson, "w" )
             toFile = json.dumps(data, indent=4)
             fd.write(toFile)
             fd.close()
-
 
         # Respond to Client
         payLoad = endpoints[capabilities[command]]["payload"]
         header = data['header']
         header["Results"] = payLoad
 
-        payLoad = json.dumps(header,ensure_ascii=False)
+        payLoad = json.dumps(header, ensure_ascii=False)
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
         self.wfile.write(bytes(payLoad, "utf-8"))
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     webServer = HTTPServer((hostName, serverPort), MyServer)
     print("Server started http://%s:%s" % (hostName, serverPort))
 
