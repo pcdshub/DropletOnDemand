@@ -1,26 +1,34 @@
 # Python 3 server example
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import time
+import json
 
 hostName = "localhost"
-serverPort = 8080
-
+serverPort = 8081
+capabilities = dict()
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self): 
+
+        try:
+            payLoad = capabilities[self.path];
+        except:
+            self.send_response(404)
+
         self.send_response(200)
-        print(self.path)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        self.wfile.write(bytes("<html><head><title>https://pythonbasics.org</title></head>", "utf-8"))
-        self.wfile.write(bytes("<p>Request: %s</p>" % self.path, "utf-8"))
-        self.wfile.write(bytes("<body>", "utf-8"))
-        self.wfile.write(bytes("<p>This is an example web server.</p>", "utf-8"))
-        self.wfile.write(bytes("</body></html>", "utf-8"))
-        # print("yeah")
+        self.wfile.write(bytes(payLoad, "utf-8"))
+
 
 
 if __name__ == "__main__":        
+
+    fd = open('supported.json')
+    data = json.load(fd)
+    for endpoint in data['endpoints']:
+        capabilities[endpoint["API"]] = endpoint["payload"]
+    fd.close()
+
+    print(capabilities)
+
     webServer = HTTPServer((hostName, serverPort), MyServer)
     print("Server started http://%s:%s" % (hostName, serverPort))
 

@@ -1,3 +1,25 @@
 {
   
+    "endpoints":[
+        {
+            "API": "/DOD/Connect",
+            "payload": "connecting"
+        },
+        {
+            "API": "/DOD/Disconnect",
+            "payload": "disconnecting"
+        },
+        {
+            "API": "/DOD/get/status",
+            "payload": ""
+        },
+        {
+            "API": "/DOD/get/PositionNames",
+            "payload": ""
+        },
+        {
+            "API": "/DOD/get/CurrentPosition",
+            "payload": ""
+        }
+    ]
 }
