@@ -2,24 +2,43 @@
   
     "endpoints":[
         {
-            "API": "/DOD/Connect",
-            "payload": "connecting"
+            "API": "/DoD/Connect",
+            "payload": " "
         },
         {
-            "API": "/DOD/Disconnect",
-            "payload": "disconnecting"
+            "API": "/DoD/Disconnect",
+            "payload": " "
         },
         {
-            "API": "/DOD/get/status",
-            "payload": ""
+            "API": "/DoD/get/Status",
+            "payload": " "
         },
         {
-            "API": "/DOD/get/PositionNames",
-            "payload": ""
+            "API": "/DoD/get/CurrentPosition",
+            "payload": " "
         },
         {
-            "API": "/DOD/get/CurrentPosition",
-            "payload": ""
+            "API": "/DoD/do/Move",
+            "payload": "PositionName",
+            "_commnet": "/DoD/do/Move?PositionName={value}"
+        },
+        {
+            "API": "/DoD/do/MoveX",
+            "payload": "X",
+            "_comment":"/DoD/do/MoveX?X={value}"
+        },
+        {
+            "API": "/DoD/do/ExecuteTask",
+            "payload": "TaskName",
+            "_comment": "/DoD/do/ExecuteTask?TaskName={value}"
+        },
+        {
+            "API": "/DoD/AutoDrop",
+            "payload": " "
+        },
+        {
+            "API": "/DoD/do/InteractionPoint",
+            "payload": " "
         }
     ]
 }
