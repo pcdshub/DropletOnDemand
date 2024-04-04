@@ -35,8 +35,7 @@
         },
         {
             "API": "/DoD/get/PositionNames",
-            "payload": 
-            [
+            "payload": [
                 "Probe (96WP-1nozzle_mailin)",
                 "Target (Test)",
                 "Home",
@@ -102,8 +101,7 @@
         },
         {
             "API": "/DoD/get/TaskNames",
-            "payload":
-            [
+            "payload": [
                 "14_DayWashProcedure",
                 "AirEx",
                 "AirGapTakeProbe_25ul",
@@ -208,8 +206,8 @@
                 "sciCleanWashTray1",
                 "take60_camera",
                 "take60_dip_camera",
-                "§PrimeTask1",
-                "§PrimeTask2"
+                "\u00a7PrimeTask1",
+                "\u00a7PrimeTask2"
             ]
         },
         {
