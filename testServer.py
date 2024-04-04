@@ -19,32 +19,53 @@ class MyServer(BaseHTTPRequestHandler):
         print(command, args)
 
         # Check if command exists
-        fd = open(supportedJson)
+        fd = open(supportedJson, "r" )
         data = json.load(fd)
-        capabilities = dict()
-        for endpoint in data['endpoints']:
-            capabilities[endpoint["API"]] = endpoint["payload"]
 
-        fd.close()
+
+        endpoints = data["endpoints"]
+        capabilities = dict()
+
+        endpointIndex = 0
+        for endpoint in  endpoints:
+            capabilities[endpoint["API"]] = endpointIndex
+            endpointIndex = endpointIndex + 1
 
         if command not in capabilities.keys():
+            fd.close()
             self.send_response(404)
             self.end_headers()
             return
 
-        # Respond to client
-        payLoad = capabilities[command];
-        header = data['header']
-        header['Result'] = payLoad
+        fd.close()
 
-        # Response Json
+
+        # Udate JSON File IF we have Inputs
+        currentCommandJson = endpoints[capabilities[command]]
+        if "args" in currentCommandJson.keys():
+            for arg in args:
+                (var , value) = arg.split("=")
+                currentCommandJson['args'][var] = value
+
+            endpoints[capabilities[command]] = currentCommandJson
+            data["endpoints"] = endpoints
+
+
+            fd = open(supportedJson, "w" )
+            toFile = json.dumps(data, indent=4)
+            fd.write(toFile)
+            fd.close()
+
+
+        # Respond to Client
+        payLoad = endpoints[capabilities[command]]["payload"]
+        header = data['header']
+
         payLoad = json.dumps(header,ensure_ascii=False)
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
         self.wfile.write(bytes(payLoad, "utf-8"))
-
-
 
 if __name__ == "__main__":
 
