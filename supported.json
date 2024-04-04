@@ -1,44 +1,81 @@
 {
-  
+    "header":
+    {
+        "Time":"3/18/2024 8:01:26 AM",
+        "Status":{"Status":"Idle","StatusCode":200},
+        "LastID":1579463888163,
+        "ErrorCode":0,
+        "ErrorMessage":"NA",
+        "Result":{}
+    },
+
     "endpoints":[
         {
             "API": "/DoD/Connect",
-            "payload": " "
+            "payload": "Accepted"
         },
         {
             "API": "/DoD/Disconnect",
-            "payload": " "
+            "payload": "Accepted"
         },
         {
             "API": "/DoD/get/Status",
-            "payload": " "
+            "payload": {
+                "Position": {
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 500
+                },
+                "LastProbe": "",
+                "Humidity": 10,
+                "Temperature": 228,
+                "BathTemp": -99
+            }
         },
         {
             "API": "/DoD/get/CurrentPosition",
-            "payload": " "
+            "payload": 
+            {
+                "CurrentPosition": 0,
+                "Position": [
+                    "0",
+                    "Probe (96WP-1nozzle_mailin)",
+                    "185991",
+                    "93302",
+                    "24000",
+                    "25000",
+                    "25000",
+                    "5000"
+                ],
+                "PositionReal": {
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 500
+                }
+            }
         },
         {
             "API": "/DoD/do/Move",
-            "payload": "PositionName",
+            "payload": "Accepted",
             "_commnet": "/DoD/do/Move?PositionName={value}"
         },
         {
             "API": "/DoD/do/MoveX",
-            "payload": "X",
+            "payload": "Accepted",
             "_comment":"/DoD/do/MoveX?X={value}"
         },
         {
             "API": "/DoD/do/ExecuteTask",
-            "payload": "TaskName",
+            "payload": "Accepted",
             "_comment": "/DoD/do/ExecuteTask?TaskName={value}"
         },
         {
             "API": "/DoD/AutoDrop",
-            "payload": " "
+            "payload": "Accepted"
         },
         {
             "API": "/DoD/do/InteractionPoint",
-            "payload": " "
+            "payload": "Rejected"
         }
     ]
 }
