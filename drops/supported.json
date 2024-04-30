@@ -12,7 +12,7 @@
     },
     "endpoints": [
         {
-            "API": "/DoD/Connect",
+            "API": "/DoD/Connect?ClientName={value}",
             "payload": "Accepted"
         },
         {
@@ -211,15 +211,15 @@
             ]
         },
         {
-            "API": "/DoD/do/Move",
+            "API": "/DoD/do/Move?PositionName={value}",
             "payload": "Accepted",
             "args": {
                 "PositionName": " "
             },
-            "_commnet": "/DoD/do/Move?PositionName={value}"
+            "_comment": "/DoD/do/Move?PositionName={value}"
         },
         {
-            "API": "/DoD/do/MoveX",
+            "API": "/DoD/do/MoveX?X={value}",
             "payload": "Accepted",
             "args": {
                 "X": "300"
@@ -227,7 +227,7 @@
             "_comment": "/DoD/do/MoveX?X={value}"
         },
         {
-            "API": "/DoD/do/ExecuteTask",
+            "API": "/DoD/do/ExecuteTask?TaskName={value}",
             "payload": "Accepted",
             "args": {
                 "TaskName": "Home"
