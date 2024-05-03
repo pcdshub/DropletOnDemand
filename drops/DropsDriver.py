@@ -4,7 +4,7 @@ import pprint
 import argparse
 
 from http.client import HTTPConnection
-from multiprocessing import Queue
+from multiprocessing import Queue, Semaphore
 
 
 def parse_arguments(obj):
@@ -34,7 +34,8 @@ class myClient:
   def __init__(self, ip, port, queue=None, **kwargs):
     self.__IP__ = ip
     self.__PORT__ = port
-    self.__queue__ = queue
+    self.__queue__ = Queue()
+    self.__queue_ready__ = Semaphore(value=0)
 
     self.enumerate_ends()  # expensive file io, do once in constructor. 
 
@@ -56,7 +57,9 @@ class myClient:
           continue
         # slightly evil but this queries for supported argument lists per do end point
         cursed = f"/DoD/get/{ent.split('?')[1].split('=')[0]}s"
-        self.supported_ends['do'][ent] = json.loads(self.send(cursed).read().decode('utf-8'))["Result"]  # i should be shot for this
+        print(f"Cursed endpoint: {cursed}")
+        self.send(cursed)
+        self.supported_ends['do'][ent] = json.loads(self.get_response().read().decode('utf-8'))["Result"]  # i should be shot for this
 
     pprint.pprint(self.supported_ends)
 
@@ -93,13 +96,23 @@ class myClient:
 
     if (self.__queue__ is not None):
       self.__queue__.put(reply)
-    return reply  # TODO! the reply is consumed when used this way. be more mindful 
+      self.__queue_ready__.release()
+    return
+
+  '''
+  Pops most recent response from response queue
+  '''
+  def get_response(self):
+    self.__queue_ready__.acquire()
+    print("NOOO BLOCK")
+    return self.__queue__.get()
 
 
 if __name__ == "__main__":
   logging.basicConfig(level=logging.DEBUG)
   # init connection to client
-  client = myClient(ip="172.21.148.101", port=9999)
+  # client = myClient(ip="172.21.148.101", port=9999)
+  client = myClient(ip="127.0.0.1", port=8081)
   # check validity of user specified arg
   args = parse_arguments(client)
   # transmit command
