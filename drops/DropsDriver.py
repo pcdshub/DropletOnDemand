@@ -7,6 +7,8 @@ from http.client import HTTPConnection
 from multiprocessing import Queue, Semaphore
 from helpers import ServerResponse, SupportedEndsHandler
 
+logger = logging.getLogger(__name__)
+
 
 def parse_arguments(obj):
   # arg parse and validation
@@ -42,7 +44,7 @@ class myClient:
     self.__supported_ends_handler__ = SupportedEndsHandler('supported.json',
                                                          self.conn)
 
-    logging.info(f"Connected to ip: {ip} port: {port}")
+    logger.info(f"Connected to ip: {ip} port: {port}")
     self.supported_ends = self.__supported_ends_handler__.get_endpoints()
 
 
@@ -52,11 +54,11 @@ class myClient:
   it will persist result in a place that can be read... TODO: actually do this
   '''
   def send(self, endpoint):
-    logging.info(f"attempting to send: {endpoint}...")
+    logger.info(f"attempting to send: {endpoint}...")
     self.conn.request("GET", endpoint)
-    logging.info("issued request")
+    logger.info("issued request")
     reply = self.conn.getresponse()
-    logging.info("got response")
+    logger.info("got response")
 
     reply_obj = ServerResponse(reply)
 

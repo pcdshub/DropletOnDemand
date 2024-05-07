@@ -4,6 +4,8 @@ from multiprocessing import Queue, Semaphore
 import json
 import logging
 
+logger = logging.getLogger(__name__)
+
 class ServerResponse:
     """
         Object for parsing incomming HTTPResponse from Robot
@@ -51,7 +53,7 @@ class SupportedEndsHandler:
         try:
           f = open(self.file)
         except FileNotFoundError:
-          logging.error("File supported.json not found")
+          logger.error("File supported.json not found")
 
         with f:
           json_data = json.load(f)["endpoints"]
@@ -77,11 +79,12 @@ it will not check the validity of request
 it will persist result in a place that can be read.
 '''
 def send(conn : HTTPConnection, queue : Queue, q_ready : Semaphore, endpoint : str):
-    logging.info(f"attempting to send: {endpoint}...")
+    logger.info(f"attempting to send: {endpoint}...")
+
     conn.request("GET", endpoint)
-    logging.info("issued request")
+    logger.info("issued request")
     reply = conn.getresponse()
-    logging.info("got response")
+    logger.info("got response")
 
     reply_obj = ServerResponse(reply)
 
