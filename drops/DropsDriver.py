@@ -5,7 +5,7 @@ import argparse
 
 from http.client import HTTPConnection
 from multiprocessing import Queue, Semaphore
-from helpers import ServerResponse
+from helpers import ServerResponse, SupportedEndsHandler
 
 
 def parse_arguments(obj):
@@ -38,51 +38,12 @@ class myClient:
     self.__queue__ = Queue()
     self.__queue_ready__ = Semaphore(value=0)
 
-    self.enumerate_ends()  # expensive file io, do once in constructor. 
-
     self.conn = HTTPConnection(host=self.__IP__, port=self.__PORT__)
+    self.__supported_ends_handler__ = SupportedEndsHandler('supported.json',
+                                                         self.conn)
+
     logging.info(f"Connected to ip: {ip} port: {port}")
-
-    self.enumerate_valid_dos()
-
-  '''
-  TODO: I would like these moved to an 'update fiducual' section, to be persisted in a source of truth json file
-        the object can then decide to load the held fiducal list or generate a new one via these calls
-  '''
-  def enumerate_valid_dos(self):
-    for ent in self.supported_ends['do'].keys():
-      # check this do endpoint takes an argument
-      if '?' in ent:
-        # Any float is acceptable for pure moves
-        if 'MoveX' in ent or 'MoveY' in ent or "MoveZ" in ent:
-          continue
-        # slightly evil but this queries for supported argument lists per do end point
-        cursed = f"/DoD/get/{ent.split('?')[1].split('=')[0]}s"
-        print(f"Cursed endpoint: {cursed}")
-        self.send(cursed)
-        self.supported_ends['do'][ent] = self.get_response().RESULTS
-
-    pprint.pprint(self.supported_ends)
-
-  def enumerate_ends(self):
-    self.supported_ends = {
-      'get' : [],
-      'do' : {},
-      'conn' : []
-    }
-    # attempt to ingest supported.json which enumerates API end points
-    try:
-      f = open('supported.json')
-    except FileNotFoundError:
-      logging.error("File supported.json not found")
-
-    with f:
-      json_data = json.load(f)["endpoints"]
-      self.supported_ends['get'] = [x['API'] for x in json_data if x['API'][5:8] == 'get']
-      self.supported_ends['do'] = {x['API'] : None for x in json_data if x['API'][5:7] == 'do'}
-      self.supported_ends['conn'] = [x['API'] for x in json_data if 'connect' in x['API'][5:].lower()]
-
-    pprint.pprint(self.supported_ends)
+    self.supported_ends = self.__supported_ends_handler__.get_endpoints()
 
   '''
   send transmits a formatted HTTP GET request
@@ -108,7 +69,6 @@ class myClient:
   '''
   def get_response(self):
     self.__queue_ready__.acquire()
-    print("NOOO BLOCK")
     return self.__queue__.get()
 
 
@@ -119,6 +79,8 @@ if __name__ == "__main__":
   client = myClient(ip="127.0.0.1", port=8081)
   # check validity of user specified arg
   args = parse_arguments(client)
+
   # transmit command
-  x = client.send(args.get)
-  print(x.read())
+  client.send(args.get)
+  x = client.get_response()
+  print(x.RESULTS)
