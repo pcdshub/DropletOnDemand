@@ -5,6 +5,7 @@ import argparse
 
 from http.client import HTTPConnection
 from multiprocessing import Queue, Semaphore
+from helpers import ServerResponse
 
 
 def parse_arguments(obj):
@@ -27,7 +28,7 @@ def parse_arguments(obj):
 Simple HTTP Client wrapper.
 Takes ip and port on construction can send data on socket and print reply
 Can be invoked via command line args or as orchestrated by higher level software
-''' 
+'''
 
 
 class myClient:
@@ -43,7 +44,7 @@ class myClient:
     logging.info(f"Connected to ip: {ip} port: {port}")
 
     self.enumerate_valid_dos()
-  
+
   '''
   TODO: I would like these moved to an 'update fiducual' section, to be persisted in a source of truth json file
         the object can then decide to load the held fiducal list or generate a new one via these calls
@@ -59,7 +60,7 @@ class myClient:
         cursed = f"/DoD/get/{ent.split('?')[1].split('=')[0]}s"
         print(f"Cursed endpoint: {cursed}")
         self.send(cursed)
-        self.supported_ends['do'][ent] = json.loads(self.get_response().read().decode('utf-8'))["Result"]  # i should be shot for this
+        self.supported_ends['do'][ent] = self.get_response().RESULTS
 
     pprint.pprint(self.supported_ends)
 
@@ -74,6 +75,7 @@ class myClient:
       f = open('supported.json')
     except FileNotFoundError:
       logging.error("File supported.json not found")
+
     with f:
       json_data = json.load(f)["endpoints"]
       self.supported_ends['get'] = [x['API'] for x in json_data if x['API'][5:8] == 'get']
@@ -94,8 +96,10 @@ class myClient:
     reply = self.conn.getresponse()
     logging.info("got response")
 
+    reply_obj = ServerResponse(reply)
+
     if (self.__queue__ is not None):
-      self.__queue__.put(reply)
+      self.__queue__.put(reply_obj)
       self.__queue_ready__.release()
     return
 
