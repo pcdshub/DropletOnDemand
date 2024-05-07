@@ -2,6 +2,7 @@
 from http.client import HTTPConnection, HTTPResponse
 from multiprocessing import Queue, Semaphore
 import json
+import logging
 
 class ServerResponse:
     """
@@ -76,11 +77,11 @@ it will not check the validity of request
 it will persist result in a place that can be read.
 '''
 def send(conn : HTTPConnection, queue : Queue, q_ready : Semaphore, endpoint : str):
-    #logging.info(f"attempting to send: {endpoint}...")
+    logging.info(f"attempting to send: {endpoint}...")
     conn.request("GET", endpoint)
-    #logging.info("issued request")
+    logging.info("issued request")
     reply = conn.getresponse()
-    #logging.info("got response")
+    logging.info("got response")
 
     reply_obj = ServerResponse(reply)
 
