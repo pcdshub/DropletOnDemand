@@ -40,9 +40,11 @@ class SupportedEndsHandler:
         return self.supported_ends
 
     def reload_endpoint(self, endpoint : str):
-            send(self.__conn__, self.__queue__, self.__queue_ready__, endpoint)
-            self.supported_ends['do'][ent] = get_response(self.__queue__,
-                                                          self.__queue_ready__).RESULTS
+        if endpoint in self.supported_ends['do'].keys():
+            cursed = f"/DoD/get/{endpoint.split('?')[1].split('=')[0]}s"
+            send(self.__conn__, self.__queue__, self.__queue_ready__, cursed)
+            self.supported_ends['do'][endpoint] = get_response(self.__queue__,
+                                                              self.__queue_ready__).RESULTS
 
     def reload_all(self):
         try:
@@ -71,7 +73,7 @@ class SupportedEndsHandler:
 '''
 send transmits a formatted HTTP GET request
 it will not check the validity of request
-it will persist result in a place that can be read... TODO: actually do this
+it will persist result in a place that can be read.
 '''
 def send(conn : HTTPConnection, queue : Queue, q_ready : Semaphore, endpoint : str):
     #logging.info(f"attempting to send: {endpoint}...")

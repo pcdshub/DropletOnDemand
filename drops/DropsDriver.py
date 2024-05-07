@@ -45,6 +45,7 @@ class myClient:
     logging.info(f"Connected to ip: {ip} port: {port}")
     self.supported_ends = self.__supported_ends_handler__.get_endpoints()
 
+
   '''
   send transmits a formatted HTTP GET request
   it will not check the validity of request
