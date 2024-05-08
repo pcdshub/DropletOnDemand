@@ -4,9 +4,9 @@ import argparse
 
 from http.client import HTTPConnection
 from multiprocessing import Queue, Semaphore
-from helpers import ServerResponse, SupportedEndsHandler
-from helpers import send as h_send
-from helpers import get_response as h_get_response
+from drops.helpers import ServerResponse, SupportedEndsHandler
+from drops.helpers import send as h_send
+from drops.helpers import get_response as h_get_response
 
 logger = logging.getLogger(__name__)
 

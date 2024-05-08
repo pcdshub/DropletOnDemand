@@ -7,7 +7,7 @@ test:
 
 .PHONY: update_drops
 update_drops:
-	@cd beams && pip install --editable ..
+	@cd drops && pip install --editable ..
 
 .PHONY: run_test_server
 run_test_server:
