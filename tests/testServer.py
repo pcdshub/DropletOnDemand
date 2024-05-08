@@ -5,7 +5,7 @@ import json
 
 hostName = "localhost"
 serverPort = 8081
-supportedJson = '../supported.json'
+supportedJson = 'drops/supported.json'
 
 
 class MyServer(BaseHTTPRequestHandler):
@@ -62,6 +62,8 @@ class MyServer(BaseHTTPRequestHandler):
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
         self.wfile.write(bytes(payLoad, "utf-8"))
+
+        print(payLoad)
 
 
 if __name__ == "__main__":
