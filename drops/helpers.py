@@ -44,10 +44,15 @@ class SupportedEndsHandler:
 
     def reload_endpoint(self, endpoint : str):
         if endpoint in self.supported_ends['do'].keys():
+          # check this do endpoint takes an argument
+          if '?' in endpoint:
+            # Any float is acceptable for pure moves
+            if 'MoveX' in endpoint or 'MoveY' in endpoint or "MoveZ" in endpoint:
+              return
             cursed = f"/DoD/get/{endpoint.split('?')[1].split('=')[0]}s"
             send(self.__conn__, self.__queue__, self.__queue_ready__, cursed)
             self.supported_ends['do'][endpoint] = get_response(self.__queue__,
-                                                              self.__queue_ready__).RESULTS
+                                                               self.__queue_ready__).RESULTS
 
     def reload_all(self):
         try:
@@ -62,16 +67,8 @@ class SupportedEndsHandler:
           self.supported_ends['conn'] = [x['API'] for x in json_data if 'connect' in x['API'][5:].lower()]
 
         for ent in self.supported_ends['do'].keys():
-          # check this do endpoint takes an argument
-          if '?' in ent:
-            # Any float is acceptable for pure moves
-            if 'MoveX' in ent or 'MoveY' in ent or "MoveZ" in ent:
-              continue
-            # slightly evil but this queries for supported argument lists per do end point
-            cursed = f"/DoD/get/{ent.split('?')[1].split('=')[0]}s"
-            send(self.__conn__, self.__queue__, self.__queue_ready__, cursed)
-            self.supported_ends['do'][ent] = get_response(self.__queue__,
-                                                          self.__queue_ready__).RESULTS
+          self.reload_endpoint(ent)
+
 
 '''
 send transmits a formatted HTTP GET request
@@ -92,6 +89,7 @@ def send(conn : HTTPConnection, queue : Queue, q_ready : Semaphore, endpoint : s
       queue.put(reply_obj)
       q_ready.release()
     return
+
 
 '''
 Pops most recent response from response queue

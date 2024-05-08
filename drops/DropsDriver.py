@@ -19,10 +19,10 @@ def parse_arguments(obj):
 
   group = parser.add_mutually_exclusive_group(required=True)  # only accept one of the following
   # get, trivial
-  group.add_argument("-g", "--get", help="Call HTTP get on endpoint", type=str, choices=obj.supported_ends['get'])
+  group.add_argument("-g", "--get", help="Call HTTP get on endpoint", type=str, choices=obj.supported_ends()['get'])
   # do
-  group.add_argument("-m", "--move", help="move to enumerated position", type=str, choices=obj.supported_ends['do']["/DoD/do/Move?PositionName={value}"])
-  group.add_argument("-t", "--task", help='execute enumerated task', type=str, choices=obj.supported_ends['do']["/DoD/do/ExecuteTask?TaskName={value}"])
+  group.add_argument("-m", "--move", help="move to enumerated position", type=str, choices=obj.supported_ends()['do']["/DoD/do/Move?PositionName={value}"])
+  group.add_argument("-t", "--task", help='execute enumerated task', type=str, choices=obj.supported_ends()['do']["/DoD/do/ExecuteTask?TaskName={value}"])
 
   return parser.parse_args()
 
@@ -43,12 +43,11 @@ class myClient:
 
     self.conn = HTTPConnection(host=self.__IP__, port=self.__PORT__)
     self.supported_ends_handler = SupportedEndsHandler('supported.json',
-                                                         self.conn)
+                                                        self.conn)
 
     logger.info(f"Connected to ip: {ip} port: {port}")
-    self.supported_ends = self.supported_ends_handler.get_endpoints()
-    pprint.pprint(self.supported_ends)
-
+    self.supported_ends = lambda : self.supported_ends_handler.get_endpoints()
+    pprint.pprint(self.supported_ends())
 
   '''
   send transmits a formatted HTTP GET request
