@@ -1,11 +1,12 @@
 import logging
-import json
 import pprint
 import argparse
 
 from http.client import HTTPConnection
 from multiprocessing import Queue, Semaphore
 from helpers import ServerResponse, SupportedEndsHandler
+from helpers import send as h_send
+from helpers import get_response as h_get_response
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +42,12 @@ class myClient:
     self.__queue_ready__ = Semaphore(value=0)
 
     self.conn = HTTPConnection(host=self.__IP__, port=self.__PORT__)
-    self.__supported_ends_handler__ = SupportedEndsHandler('supported.json',
+    self.supported_ends_handler = SupportedEndsHandler('supported.json',
                                                          self.conn)
 
     logger.info(f"Connected to ip: {ip} port: {port}")
-    self.supported_ends = self.__supported_ends_handler__.get_endpoints()
+    self.supported_ends = self.supported_ends_handler.get_endpoints()
+    pprint.pprint(self.supported_ends)
 
 
   '''
@@ -54,25 +56,14 @@ class myClient:
   it will persist result in a place that can be read... TODO: actually do this
   '''
   def send(self, endpoint):
-    logger.info(f"attempting to send: {endpoint}...")
-    self.conn.request("GET", endpoint)
-    logger.info("issued request")
-    reply = self.conn.getresponse()
-    logger.info("got response")
-
-    reply_obj = ServerResponse(reply)
-
-    if (self.__queue__ is not None):
-      self.__queue__.put(reply_obj)
-      self.__queue_ready__.release()
-    return
+      h_send(self.conn, self.__queue__, self.__queue_ready__, endpoint)
+      return
 
   '''
   Pops most recent response from response queue
   '''
   def get_response(self):
-    self.__queue_ready__.acquire()
-    return self.__queue__.get()
+    return h_get_response(self.__queue__, self.__queue_ready__)
 
 
 if __name__ == "__main__":
