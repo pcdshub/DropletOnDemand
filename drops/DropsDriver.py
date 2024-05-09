@@ -35,15 +35,18 @@ Can be invoked via command line args or as orchestrated by higher level software
 
 
 class myClient:
-  def __init__(self, ip, port, queue=None, **kwargs):
+  def __init__(self, ip, port, supported_json="supported.json", reload=True, queue=None, **kwargs):
     self.__IP__ = ip
     self.__PORT__ = port
     self.__queue__ = Queue()
     self.__queue_ready__ = Semaphore(value=0)
 
     self.conn = HTTPConnection(host=self.__IP__, port=self.__PORT__)
-    self.supported_ends_handler = SupportedEndsHandler('supported.json',
-                                                        self.conn)
+    self.supported_ends_handler = SupportedEndsHandler(supported_json,
+                                                       self.conn)
+
+    if (reload):
+      self.supported_ends_handler.reload_all()
 
     logger.info(f"Connected to ip: {ip} port: {port}")
     self.supported_ends = lambda : self.supported_ends_handler.get_endpoints()
