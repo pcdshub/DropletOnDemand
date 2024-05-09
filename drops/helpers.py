@@ -6,6 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class ServerResponse:
     """
         Object for parsing incomming HTTPResponse from Robot
@@ -37,7 +38,6 @@ class SupportedEndsHandler:
           'do' : {},
           'conn' : []
         }
-        self.reload_all()
 
     def get_endpoints(self):
         return self.supported_ends
