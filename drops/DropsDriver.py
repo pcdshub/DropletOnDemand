@@ -20,6 +20,8 @@ def parse_arguments(obj):
   group = parser.add_mutually_exclusive_group(required=True)  # only accept one of the following
   # get, trivial
   group.add_argument("-g", "--get", help="Call HTTP get on endpoint", type=str, choices=obj.supported_ends()['get'])
+  group.add_argument("-c", "--connect", help="Connect to the API", action='store_true')  # TODO: take string argument of username
+  group.add_argument("-d", "--disconnect", help="Call HTTP get on endpoint", action='store_true') 
   # do
   group.add_argument("-m", "--move", help="move to enumerated position", type=str, choices=obj.supported_ends()['do']["/DoD/do/Move?PositionName={value}"])
   group.add_argument("-t", "--task", help='execute enumerated task', type=str, choices=obj.supported_ends()['do']["/DoD/do/ExecuteTask?TaskName={value}"])
@@ -35,7 +37,7 @@ Can be invoked via command line args or as orchestrated by higher level software
 
 
 class myClient:
-  def __init__(self, ip, port, supported_json="supported.json", reload=True, queue=None, **kwargs):
+  def __init__(self, ip, port, supported_json="drops/supported.json", reload=True, queue=None, **kwargs):
     # dto pipelines
     self.__queue__ = Queue()
     self.__queue_ready__ = Semaphore(value=0)
@@ -56,7 +58,17 @@ class myClient:
     self.supported_ends = lambda : self.supported_ends_handler.get_endpoints()
     pprint.pprint(self.supported_ends())
 
+  '''
+  Middleware interaction defintions
+  Here we define specific interactions that the machine is capable of fielding
+  These actions are exposed as member functions of this driver class. 
+  '''
+
   def middle_invocation_wrapper(func):
+    '''
+    Define a decorator function to adorn all of these 'high' middleware calls
+    Logs what functions is being called and returns the response. 
+    '''
     def inner(self):
       logger.info(f"Invoking {func.__name__}")
       func(self)
@@ -69,7 +81,7 @@ class myClient:
         Required to send 'Do' requests
       """
       print("here")
-      self.send("/DoD/Connect?ClientName=egg")
+      self.send("/DoD/Connect?ClientName={value}")
       print("now here")
 
   def disconnect(self):
@@ -176,8 +188,9 @@ class myClient:
   it will persist result in a place that can be read... TODO: actually do this
   '''
   def send(self, endpoint):
-      self.transceiver.send(endpoint)
-      return
+    print("HEEERE")
+    self.transceiver.send(endpoint)
+    return
 
   '''
   Pops most recent response from response queue
@@ -195,6 +208,11 @@ if __name__ == "__main__":
   args = parse_arguments(client)
 
   # transmit command
-  client.send(args.get)
+  if (args.connect):
+    client.send("/DoD/Connect?ClientName={value}")
+  elif (args.disconnect):
+    client.send("/DoD/Disconnect")
+  else:
+    client.send(args.get)
   x = client.get_response()
   print(x.RESULTS)
