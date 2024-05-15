@@ -55,7 +55,7 @@ class MyServer(BaseHTTPRequestHandler):
         # Respond to Client
         payLoad = endpoints[capabilities[command]]["payload"]
         header = data['header']
-        header["Results"] = payLoad
+        header["Result"] = payLoad
 
         payLoad = json.dumps(header, ensure_ascii=False)
         self.send_response(200)
