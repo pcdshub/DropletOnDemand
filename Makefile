@@ -3,9 +3,16 @@ VERSION=0x03
 
 FTPUSER ?=joshc
 
+TST_FILES_ALL := $(wildcard tests/Test*.py)
+TST_FILES_LOCAL := $(filter-out tests/TestHIL.py, $(TST_FILES_ALL))
+
 .PHONY: test
 test:
-	@source venv/bin/activate && pytest --capture=tee-sys -vv tests/Test*.py
+	@source venv/bin/activate && pytest --capture=tee-sys -vv $(TST_FILES_LOCAL)
+
+.PHONY: test_all
+test_all:
+	@source venv/bin/activate && pytest --capture=tee-sys -vv $(TST_FILES_ALL)
 
 .PHONY: update_drops
 update_drops:
@@ -17,4 +24,4 @@ run_test_server:
 
 .PHONY: transfer_working_files
 transfer_working_files:
-	rsync -zvaP tests drops $(FTPUSER)@psbuild-rhel7:~/DoDRobotCode/
+	rsync -zvaP Makefile setup.py tests drops $(FTPUSER)@psbuild-rhel7:~/DoDRobotCode/

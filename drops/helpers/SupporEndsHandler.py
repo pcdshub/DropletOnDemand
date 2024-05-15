@@ -9,9 +9,12 @@ from drops.helpers.ServerResponse import ServerResponse
 logger = logging.getLogger(__name__)
 
 
+# TODO: all file io should go through JsonFileHandler, this class should only concern itself with 
+# the logic of interacting with the actual to update our notion of what endpoints the machine supports and the arguments those take
+# because the machine is the source of truth for what API is provided
 class SupportedEndsHandler:
     """
-        Class ment to handle supported endpoints Json file.
+        Class meant to handle supported endpoints Json file.
             Reloads endpoints, keeps track of API args, and possible 'do' actions
 
             TODO: Write updates to JSON file?
