@@ -46,14 +46,14 @@ class myClient:
     self.__PORT__ = port
     self.conn = HTTPConnection(host=self.__IP__, port=self.__PORT__)
     self.transceiver = HTTPTransceiver(self.conn, self.__queue__, self.__queue_ready__)
+    logger.info(f"Connected to ip: {ip} port: {port}")
+    
     # configuration persitence, updating
     self.supported_ends_handler = SupportedEndsHandler(supported_json,
                                                        self.conn)
-
     if (reload):
       self.supported_ends_handler.reload_all()
 
-    logger.info(f"Connected to ip: {ip} port: {port}")
     # convinient member lambda for grabbing supported endpoitns
     self.supported_ends = lambda : self.supported_ends_handler.get_endpoints()
     pprint.pprint(self.supported_ends())
@@ -80,9 +80,7 @@ class myClient:
       """
         Required to send 'Do' requests
       """
-      print("here")
       self.send("/DoD/Connect?ClientName={value}")
-      print("now here")
 
   def disconnect(self):
       """
@@ -188,7 +186,6 @@ class myClient:
   it will persist result in a place that can be read... TODO: actually do this
   '''
   def send(self, endpoint):
-    print("HEEERE")
     self.transceiver.send(endpoint)
     return
 
