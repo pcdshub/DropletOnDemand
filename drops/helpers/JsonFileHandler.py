@@ -1,6 +1,7 @@
 import json
 import pprint
 
+
 class JsonFileHandler:
     """
         Handle supported.json file
@@ -23,8 +24,5 @@ class JsonFileHandler:
 
         file_fd.close()
 
-
     def get_endpoint_data(self, endpoint : str):
         return self.endpoints[self.capabilities[endpoint]]['payload']
-
-

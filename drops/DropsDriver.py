@@ -56,13 +56,21 @@ class myClient:
     self.supported_ends = lambda : self.supported_ends_handler.get_endpoints()
     pprint.pprint(self.supported_ends())
 
+  def middle_invocation_wrapper(func):
+    def inner(self):
+      logger.info(f"Invoking {func.__name__}")
+      func(self)
+      return self.get_response()
+    return inner
+
+  @middle_invocation_wrapper
   def connect(self):
       """
         Required to send 'Do' requests
       """
-      logger.info(f"Sending: /DoD/Connect")
-      self.send("/DoD/Connect")
-      return self.get_response()
+      print("here")
+      self.send("/DoD/Connect?ClientName=egg")
+      print("now here")
 
   def disconnect(self):
       """
@@ -72,14 +80,13 @@ class myClient:
       logger.info(f"Sending: /DoD/Disconnect")
       self.send("/DoD/Disconnect")
       return self.get_response()
-
+  
+  @middle_invocation_wrapper
   def get_status(self):
       """
         Returns Robot Status
       """
-      logger.info(f"Sending: /DoD/get/Status")
       self.send("/DoD/get/Status")
-      return self.get_response()
 
   def move(self, position : str):
       """
