@@ -23,18 +23,81 @@ json_handler.reload_endpoints()
 '''
 
 class TestHIL:
-  # Class 1 Test
+#        Class 1 Test
   def test_disconnect(self, capsys):
     resp = client.disconnect()
     assert resp.RESULTS == json_handler.get_endpoint_data("/DoD/Disconnect")
   
   def test_connect(self, capsys):
     # TEST Connect
-    print(client)
     client.disconnect()
     resp = client.connect()
     assert resp.RESULTS == json_handler.get_endpoint_data("/DoD/Connect?ClientName={value}")
 
-  # Class 2 Test
+#    Class 2 Test
+  def test_get_status(self, capsys):
+      # Checks if response looks like what we expect a status response should
+      # look like
+      resp = client.get_status()
+      expected_keys = [
+              'Position', 
+              'LastProbe', 
+              'Humidity', 
+              'Temperature',
+              'BathTemp',
+              ]
 
-  # Class 3 Test
+      assert resp.ERROR_MESSAGE == 'NA'
+      assert expected_keys == list(resp.RESULTS.keys())
+
+  def test_get_positionNames(self, capsys):
+      resp = client.get_position_names()
+      assert resp.ERROR_MESSAGE == 'NA' 
+      assert resp.RESULTS != {}
+
+  def test_get_taskNames(self, capsys):
+      resp = client.get_task_names()
+      assert resp.ERROR_MESSAGE == 'NA' 
+      assert resp.RESULTS != {}
+
+    # API V2
+  def test_get_PulseNames(self, capsys):
+      pass
+
+
+
+#    Class 3 Test
+  def test_move_do(self, capsys):
+      pass
+
+  def test_move_x(self, capsys):
+      pass
+
+  def test_move_execute_task(self, capsys):
+      pass
+
+  def test_autoDrop(self, capsys):
+      pass
+
+  def test_interaction(self, capsys):
+      pass
+
+  # API V2
+  def test_select_nozzle(self, capsys):
+      pass
+
+  def test_despensing(self, capsys):
+      pass
+
+  def test_setLED(self, capsys):
+      pass
+
+  def test_move_y(self, capsys):
+      pass
+
+  def test_move_z(self, capsys):
+      pass
+
+  def test_take_probe(self, capsys):
+      pass
+

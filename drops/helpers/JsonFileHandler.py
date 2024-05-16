@@ -46,7 +46,6 @@ class JsonFileHandler:
             f.close()
 
 
-
     def reload_endpoints(self):
         file_fd = open(self.file_name, 'r')
         self.data = json.load(file_fd)

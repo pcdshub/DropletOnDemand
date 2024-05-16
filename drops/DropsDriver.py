@@ -82,14 +82,13 @@ class myClient:
       """
       self.send("/DoD/Connect?ClientName={value}")
 
+  @middle_invocation_wrapper
   def disconnect(self):
       """
         The client can end the connection with access to ‘Do’ requests.
         Clicking the button ‘Disable API Control’ on the UI has the same effect.
       """
-      logger.info(f"Sending: /DoD/Disconnect")
       self.send("/DoD/Disconnect")
-      return self.get_response()
   
   @middle_invocation_wrapper
   def get_status(self):
@@ -98,30 +97,29 @@ class myClient:
       """
       self.send("/DoD/get/Status")
 
+
+  @middle_invocation_wrapper
   def move(self, position : str):
       """
         Moves the drive to a position taken from the list of 'PositionNames'
       """
-      logger.info(f"Sending: /DoD/do/Move?PositionName={position}")
       self.send(f"/DoD/do/Move?PositionName={position}")
-      return self.get_response()
 
+  @middle_invocation_wrapper
   def get_position_names(self):
       """
         Returns the list of positions in DOD robot
       """
-      logger.info(f"Sending: /DoD/get/PositionNames")
       self.send(f"/DoD/get/PositionNames")
-      return self.get_response()
 
+  @middle_invocation_wrapper
   def get_task_names(self):
       """
         Returns the list of tasks that are stored in the Robot by name
       """
-      logger.info(f"Sending: /DoD/get/TaskNames")
       self.send(f"/DoD/get/TaskNames")
-      return self.get_response()
 
+  @middle_invocation_wrapper
   def get_current_positions(self):
       """
         Returns the name and properties of the last selected position,
@@ -129,30 +127,27 @@ class myClient:
         (The drives can have been stepped away from the stored position or
          they include small dispenser related offsets.)
       """
-      logger.info(f"Sending: /DoD/get/CurrentPosition")
       self.send(f"/DoD/get/TaskNames")
-      return self.get_response()
 
+  @middle_invocation_wrapper
   def execute_task(self, value : str):
       """
         Runs a task from the list of ‘TaskName’.
         This operation is safe in general.
         It simulates the analog action on the UI.
       """
-      logger.info(f"Sending: DoD/do/ExecuteTask?TaskName={value}")
       self.send(f"DoD/do/ExecuteTask?TaskName={value}")
-      return self.get_response()
 
+  @middle_invocation_wrapper
   def auto_drop(self):
       """
         Runs the particular task that is linked to the UI button.
         Its name is ‘AutoDropDetection’. In principalm this endpoint is not needed.
         ‘ExecuteTask’ can be used instead.
       """
-      logger.info(f"Sending: /DoD/do/AutoDrop")
       self.send(f"/DoD/do/AutoDrop")
-      return self.get_response()
 
+  @middle_invocation_wrapper
   def move_to_interaction_point(self):
       """
         The moving to the predefined position of the interaction point corresponds
@@ -160,11 +155,9 @@ class myClient:
         elemts for the dispensers’ position adjustment become visible on the UI.
         The request simulates the button (beam simbol) on the UI.
       """
-
-      logger.info(f"Sending: /DoD/do/InteractionPoint")
       self.send(f"/DoD/do/InteractionPoint")
-      return self.get_response()
 
+  @middle_invocation_wrapper
   def move_x(self, value : float):
       """
         The X drive can be sent to any coordinate (the value’s unit is µm)
@@ -175,10 +168,7 @@ class myClient:
         to the selected coordinate can lead to collision or breaking of a
         dispenser Tip.
       """
-
-      logger.info(f"Sending: /DoD/do/MoveX?X={value}")
       self.send(f"/DoD/do/MoveX?X={value}")
-      return self.get_response()
 
   '''
   send transmits a formatted HTTP GET request
