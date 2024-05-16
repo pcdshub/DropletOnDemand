@@ -170,6 +170,73 @@ class myClient:
       """
       self.send(f"/DoD/do/MoveX?X={value}")
 
+    ## API V2
+  @middle_invocation_wrapper
+  def get_pulse_names(self):
+      """
+        Returns the list of available pulse shapes for the sciPULSE channels.
+      """
+      self.send(f"/DoD/get/PulseNames")
+
+  @middle_invocation_wrapper
+  def select_nozzle(self, value : str):
+      """
+        Set the selected nozzle for dispensing and task execution etc. 
+        Returns a reject if the channel value is not one of the ‘Activated Nozzles’ (see ‘NozzleStatus’).
+      """
+      self.send(f"/DoD/do/SelectNozzle?Channel={value}")
+
+
+  @middle_invocation_wrapper
+  def dispensing(self, value : str):
+      """
+        Switches between the dispensing states 
+        ‘Trigger’ (includes ‘Stat Continuous Dispensing’), 
+        ‘Free’ (‘Continuous Dispensing’ without trigger) and 
+        ‘Off’. Returns a reject if the value is not one of the three strings. 
+
+        (Some tasks can set the state to ‘Off’ without restarting dispensing afterwards.)
+      """
+      self.send(f"/DoD/do/Dispensing?State={value}")
+
+
+  @middle_invocation_wrapper
+  def setLED(self, value : str):
+      """
+      Sets the two strobe LED parameters ‘Delay’ (0 to 6500) and Duration (1 to 65000). 
+      Returns a reject if one of the values is out of range.
+      """
+      self.send(f"/DoD/do/SetLED?Duration={value}&Delay={value}")
+
+  @middle_invocation_wrapper
+  def move_y(self, value : float):
+      """
+          Same as for X
+      """
+      self.send(f"/DoD/do/MoveY?Y={value}")
+
+  @middle_invocation_wrapper
+  def move_z(self, value : float):
+      """
+          Same as for X
+      """
+      self.send(f"/DoD/do/MoveZ?Z={value}")
+
+  @middle_invocation_wrapper
+  def take_probe(self, channel : int, probe_well : float, volume : float):
+      """
+      This endpoint requires the presence of the task ‘ProbeUptake’ (attached). 
+      If that is not given, the return is not a reject, but nothing happens.
+      The parameters are 
+
+        ‘Channel’ (number of nozzle, includes effect as ‘SelectNozzle’), 
+        ‘ProbeWell’ (e.g. A1), Volume (µL). Returns a reject  if ‘Channel’ is not among 
+        ‘Active Nozzles’, Volume is > 250 or 
+        ‘ProbeWell’ is not one of the allowed wells for the selected nozzle.
+
+      """
+      self.send(f"/DoD/do/TakeProbe?Channel={channel}&ProbeWell={probe_well}&Volume={volume}")
+
   '''
   send transmits a formatted HTTP GET request
   it will not check the validity of request
