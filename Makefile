@@ -10,6 +10,10 @@ TST_FILES_LOCAL := $(filter-out tests/TestHIL.py, $(TST_FILES_ALL))
 test:
 	@source venv/bin/activate && pytest --capture=tee-sys -vv $(TST_FILES_LOCAL)
 
+.PHONY: test_HIL
+test_HIL:
+	@source venv/bin/activate && pytest --capture=tee-sys -vv tests/TestHIL.py
+
 .PHONY: test_all
 test_all:
 	@source venv/bin/activate && pytest --capture=tee-sys -vv $(TST_FILES_ALL)

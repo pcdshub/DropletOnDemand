@@ -36,7 +36,7 @@ Can be invoked via command line args or as orchestrated by higher level software
 '''
 
 
-class myClient:
+class myClient:  
   def __init__(self, ip, port, supported_json="drops/supported.json", reload=True, queue=None, **kwargs):
     # dto pipelines
     self.__queue__ = Queue()
@@ -44,9 +44,18 @@ class myClient:
     # configure connection object
     self.__IP__ = ip
     self.__PORT__ = port
-    self.conn = HTTPConnection(host=self.__IP__, port=self.__PORT__)
+
+    try:
+        self.conn = HTTPConnection(host=self.__IP__, port=self.__PORT__)
+        pass
+    except expression as identifier:
+        pass
+
+
     self.transceiver = HTTPTransceiver(self.conn, self.__queue__, self.__queue_ready__)
     logger.info(f"Connected to ip: {ip} port: {port}")
+
+
     
     # configuration persitence, updating
     self.supported_ends_handler = SupportedEndsHandler(supported_json,
@@ -57,6 +66,10 @@ class myClient:
     # convinient member lambda for grabbing supported endpoitns
     self.supported_ends = lambda : self.supported_ends_handler.get_endpoints()
     pprint.pprint(self.supported_ends())
+
+  def __del__(self):
+      # close network connection
+      self.conn.close()
 
   '''
   Middleware interaction defintions
@@ -69,18 +82,18 @@ class myClient:
     Define a decorator function to adorn all of these 'high' middleware calls
     Logs what functions is being called and returns the response. 
     '''
-    def inner(self):
+    def inner(self, *args):
       logger.info(f"Invoking {func.__name__}")
-      func(self)
+      func(self, *args)
       return self.get_response()
     return inner
 
   @middle_invocation_wrapper
-  def connect(self):
+  def connect(self, user : str):
       """
         Required to send 'Do' requests
       """
-      self.send("/DoD/Connect?ClientName={value}")
+      self.send(f"/DoD/Connect?ClientName={user}")
 
   @middle_invocation_wrapper
   def disconnect(self):
@@ -254,19 +267,18 @@ class myClient:
 
 
 if __name__ == "__main__":
-  logging.basicConfig(level=logging.DEBUG)
-  # init connection to client
-  # client = myClient(ip="172.21.148.101", port=9999)
-  client = myClient(ip="127.0.0.1", port=8081)
-  # check validity of user specified arg
-  args = parse_arguments(client)
-
-  # transmit command
-  if (args.connect):
-    client.send("/DoD/Connect?ClientName={value}")
-  elif (args.disconnect):
-    client.send("/DoD/Disconnect")
-  else:
-    client.send(args.get)
-  x = client.get_response()
-  print(x.RESULTS)
+    logging.basicConfig(level=logging.DEBUG)
+    # init connection to client
+    client = myClient(ip="172.21.148.101", port=9999)
+    #client = myClient(ip="127.0.0.1", port=8081)
+    # check validity of user specified arg
+    args = parse_arguments(client)
+    # transmit command
+    if (args.connect):
+        client.send("/DoD/Connect?ClientName={value}")
+    elif (args.disconnect):
+        client.send("/DoD/Disconnect")
+    else:
+        client.send(args.get)
+        x = client.get_response()
+        print(x.RESULTS)
