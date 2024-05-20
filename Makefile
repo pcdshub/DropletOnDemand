@@ -29,3 +29,8 @@ run_test_server:
 .PHONY: transfer_working_files
 transfer_working_files:
 	rsync -zvaP Makefile setup.py tests drops $(FTPUSER)@psbuild-rhel7:~/DoDRobotCode/
+
+# sync files to PSBUILD excluding any files from .gitignore
+.PHONY: sync
+sync:
+	rsync -zvaP --exclude-from='.gitignore' ../DropletDispensingRobot/ psbuild-rhel7:~/DoDRobotCode/

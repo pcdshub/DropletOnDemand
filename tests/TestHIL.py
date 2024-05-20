@@ -1,7 +1,10 @@
 import json
+import time
+import random
 
 from drops.DropsDriver import myClient
 from drops.helpers.JsonFileHandler import JsonFileHandler
+from drops.helpers.ServerResponse import ServerResponse
 
 # pytest encourages this pattern, apologies.
 ip = "172.21.148.101"
@@ -23,19 +26,19 @@ json_handler.reload_endpoints()
 '''
 
 class TestHIL:
-
 #        Class 1 Test
   def test_disconnect(self, capsys):
     resp = client.disconnect()
     print(resp)
-    assert resp.RESULTS == json_handler.get_endpoint_data("/DoD/Disconnect")
-  
+    assert resp.RESULTS == "Accepted"
+
   def test_connect(self, capsys):
     # TEST Connect
     client.disconnect()
+    time.sleep(0.5) # WAIT For Robot to not be Busy (500)
     resp = client.connect("BOB")
     print(resp)
-    assert resp.RESULTS == json_handler.get_endpoint_data("/DoD/Connect?ClientName={value}")
+    assert resp.RESULTS == "Accepted"
 
 #    Class 2 Test
   def test_get_status(self, capsys):
@@ -43,63 +46,122 @@ class TestHIL:
       # look like
       resp = client.get_status()
       expected_keys = [
-              'Position', 
-              'LastProbe', 
-              'Humidity', 
+              'Position',
+              'LastProbe',
+              'Humidity',
               'Temperature',
               'BathTemp',
               ]
       print(resp)
       assert expected_keys == list(resp.RESULTS.keys())
 
+  def test_get_position_names(self, capsys):
+    r = client.get_position_names()
+    print(r)
+    assert r.ERROR_CODE == 0
+    assert type(r.RESULTS) == list()
 
-  def test_get_positionNames(self, capsys):
-      resp = client.get_position_names()
-      print(resp)
+  def test_get_current_position(self, capsys):
+    """
+       Checks if response looks like what we expect a status response should
+       look like,
 
+       Expected: name and properties of the last selected position,
+                together with the real current position coordinates
 
-  def test_get_taskNames(self, capsys):
-      resp = client.get_task_names()
-      print(resp)
+    """
+    r = client.get_current_positions()
+    print(r)
+    assert r.ERROR_CODE == 0
 
-    # API V2
-  def test_get_PulseNames(self, capsys):
-      pass
+  def test_get_task_names(self, capsys):
+      # Check if reponse is not an empty array or any errors occured
+    r = client.get_task_names()
+    print(r)
+    assert r.ERROR_CODE == 0
+    assert type(r.RESULTS) != []
+
+  def test_move_do(self, capsys):
+    """
+        Test Move
+
+        Move to a random position, then make a move to another random position.
+        check if the second move was successful.
+
+        (This can change when get_current_positions is not borken)
+    """
+    client.connect("Josue")
+    r = client.get_position_names()
+    position_list = r.RESULTS
+    random.shuffle(position_list)
+    pos1 = position_list.pop(-1) # GET ITEM FROM LIST
+    r = client.move(pos1)
+
+    assert r.RESULTS == "Accepted"
+
+    while(r.STATUS['Status'] == "Busy"):
+        time.sleep(0.5)
+        r = client.get_status()
+        print(f"Moving to {pos1}...")
+
+    print("DONE")
+    assert r.ERROR_CODE == 0
+
+    """
+        check if move is equal to the requested position
+        r = client.get_current_positions()
+        assert  ps1 == r.RESULTS
+    """
+
+  def test_move_x(self, capsys):
+    """
+        Move X to some position
+
+        Check if X moved to the expected position
+    """
+    client.connect("Josue")
+    r = client.get_status()
+    now_x = r.RESULTS['Position']['X']
+
+    # Move from current position + 10
+    r = client.move_x(now_x + 10)
+
+    # Wwait for move to be done
+    while(r.STATUS['Status'] == "Busy"):
+        time.sleep(0.5)
+        r = client.get_status()
+
+    new_x = r.RESULTS['Position']['X']
+    assert new_x == now_x + 10
+    #move back
+    r = client.move_x(new_x - 10)
+
+  def test_task_do(self, capsys):
+    """
+        Select a random task from task list and execute task
+    """
+
+    client.connect("BOB")
+    r = client.get_task_names()
+    task_list = r.RESULTS
+    random.shuffle(task_list)
+    task = task_list.pop(-1) # GET ITEM FROM LIST
+
+    r = client.execute_task(task)
+
+    # Check if command was Accepted
+    assert r.RESULTS == "Accepted"
+    ## Wait for task to be done
+    while(r.STATUS['Status'] == "Busy"):
+        time.sleep(0.5)
+        r = client.get_status()
+
+    r = client.get_status()
+
+    #Check if any error occured
+    assert r.ERROR_CODE == 0
+
 
 
 
 #    Class 3 Test
-  def test_move_do(self, capsys):
-      pass
-
-  def test_move_x(self, capsys):
-      pass
-
-  def test_move_execute_task(self, capsys):
-      pass
-
-  def test_autoDrop(self, capsys):
-      pass
-
-  def test_interaction(self, capsys):
-      pass
-
-  # API V2
-  def test_select_nozzle(self, capsys):
-      pass
-
-  def test_despensing(self, capsys):
-      pass
-
-  def test_setLED(self, capsys):
-      pass
-
-  def test_move_y(self, capsys):
-      pass
-
-  def test_move_z(self, capsys):
-      pass
-
-  def test_take_probe(self, capsys):
-      pass
-
