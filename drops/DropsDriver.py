@@ -102,7 +102,7 @@ class myClient:
         Clicking the button ‘Disable API Control’ on the UI has the same effect.
       """
       self.send("/DoD/Disconnect")
-  
+
   @middle_invocation_wrapper
   def get_status(self):
       """
@@ -149,7 +149,7 @@ class myClient:
         This operation is safe in general.
         It simulates the analog action on the UI.
       """
-      self.send(f"DoD/do/ExecuteTask?TaskName={value}")
+      self.send(f"/DoD/do/ExecuteTask?TaskName={value}")
 
   @middle_invocation_wrapper
   def auto_drop(self):
@@ -192,16 +192,33 @@ class myClient:
       self.send(f"/DoD/get/PulseNames")
 
   @middle_invocation_wrapper
-  def select_nozzle(self, value : str):
+  def get_nozzle_status(self):
       """
-        Set the selected nozzle for dispensing and task execution etc. 
-        Returns a reject if the channel value is not one of the ‘Activated Nozzles’ (see ‘NozzleStatus’).
+        Returns the activated and selected nozzles an the parameters for all 
+        activated nozzles. The parameter ‘Trigger’ (true/false) is not linked 
+        to a nozzle.
+
+        Note: Nozzle parameters 
+        ‘ID’ (number),
+        ‘Volt’,
+        ‘Pulse’ (name or number),
+        ‘Freq’ ,
+        ‘Volume’ appear as an array of strings (JSON).
       """
-      self.send(f"/DoD/do/SelectNozzle?Channel={value}")
+      self.send("/DoD/get/NozzleStatus")
+
+  @middle_invocation_wrapper
+  def select_nozzle(self, channel: str):
+      """
+        Set the selected nozzle for dispensing and task execution etc.
+        Returns a reject if the channel value is not one of the 
+        ‘Activated Nozzles’ (see ‘NozzleStatus’).
+      """
+      self.send(f"/DoD/do/SelectNozzle?Channel={channel}")
 
 
   @middle_invocation_wrapper
-  def dispensing(self, value : str):
+  def dispensing(self, state: str):
       """
         Switches between the dispensing states 
         ‘Trigger’ (includes ‘Stat Continuous Dispensing’), 
@@ -210,16 +227,16 @@ class myClient:
 
         (Some tasks can set the state to ‘Off’ without restarting dispensing afterwards.)
       """
-      self.send(f"/DoD/do/Dispensing?State={value}")
+      self.send(f"/DoD/do/Dispensing?State={state}")
 
 
   @middle_invocation_wrapper
-  def setLED(self, value : str):
+  def setLED(self, duration: int, delay : int):
       """
       Sets the two strobe LED parameters ‘Delay’ (0 to 6500) and Duration (1 to 65000). 
       Returns a reject if one of the values is out of range.
       """
-      self.send(f"/DoD/do/SetLED?Duration={value}&Delay={value}")
+      self.send(f"/DoD/do/SetLED?Duration={duration}&Delay={delay}")
 
   @middle_invocation_wrapper
   def move_y(self, value : float):
