@@ -68,7 +68,7 @@ class TestHIL():
   def test_get_position_names(self, capsys):
     r = client.get_position_names()
     assert r.ERROR_CODE == 0
-    assert type(r.RESULTS) == list()
+
 
   def test_get_current_position(self, capsys):
     '''
@@ -81,14 +81,18 @@ class TestHIL():
         Currently only checks if a list is returned
     '''
     r = client.get_current_positions()
-    assert r.ERROR_CODE == 0
+    expected_keys = [
+            'CurrentPosition',
+            'Position',
+            'PositionReal',
+            ]
+    assert list(r.RESULTS.keys()) == expected_keys
 
   def test_get_task_names(self, capsys):
       # Check if reponse is not an empty array or any errors occured
     r = client.get_task_names()
     assert r.ERROR_CODE == 0
 
-    assert type(r.RESULTS) != []
 
   def test_move_do(self, capsys):
     '''

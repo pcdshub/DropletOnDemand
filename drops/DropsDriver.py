@@ -140,7 +140,7 @@ class myClient:
         (The drives can have been stepped away from the stored position or
          they include small dispenser related offsets.)
       """
-      self.send(f"/DoD/get/TaskNames")
+      self.send(f"/DoD/get/CurrentPosition")
 
   @middle_invocation_wrapper
   def execute_task(self, value : str):
