@@ -36,7 +36,7 @@ Can be invoked via command line args or as orchestrated by higher level software
 '''
 
 
-class myClient:  
+class myClient:
   def __init__(self, ip, port, supported_json="drops/supported.json", reload=True, queue=None, **kwargs):
     # dto pipelines
     self.__queue__ = Queue()
@@ -44,19 +44,10 @@ class myClient:
     # configure connection object
     self.__IP__ = ip
     self.__PORT__ = port
-
-    try:
-        self.conn = HTTPConnection(host=self.__IP__, port=self.__PORT__)
-        pass
-    except expression as identifier:
-        pass
-
-
+    self.conn = HTTPConnection(host=self.__IP__, port=self.__PORT__)
     self.transceiver = HTTPTransceiver(self.conn, self.__queue__, self.__queue_ready__)
     logger.info(f"Connected to ip: {ip} port: {port}")
 
-
-    
     # configuration persitence, updating
     self.supported_ends_handler = SupportedEndsHandler(supported_json,
                                                        self.conn)
@@ -194,11 +185,11 @@ class myClient:
   @middle_invocation_wrapper
   def get_nozzle_status(self):
       """
-        Returns the activated and selected nozzles an the parameters for all 
-        activated nozzles. The parameter ‘Trigger’ (true/false) is not linked 
+        Returns the activated and selected nozzles an the parameters for all
+        activated nozzles. The parameter ‘Trigger’ (true/false) is not linked
         to a nozzle.
 
-        Note: Nozzle parameters 
+        Note: Nozzle parameters
         ‘ID’ (number),
         ‘Volt’,
         ‘Pulse’ (name or number),
@@ -211,7 +202,7 @@ class myClient:
   def select_nozzle(self, channel: str):
       """
         Set the selected nozzle for dispensing and task execution etc.
-        Returns a reject if the channel value is not one of the 
+        Returns a reject if the channel value is not one of the
         ‘Activated Nozzles’ (see ‘NozzleStatus’).
       """
       self.send(f"/DoD/do/SelectNozzle?Channel={channel}")
@@ -220,10 +211,10 @@ class myClient:
   @middle_invocation_wrapper
   def dispensing(self, state: str):
       """
-        Switches between the dispensing states 
-        ‘Trigger’ (includes ‘Stat Continuous Dispensing’), 
-        ‘Free’ (‘Continuous Dispensing’ without trigger) and 
-        ‘Off’. Returns a reject if the value is not one of the three strings. 
+        Switches between the dispensing states
+        ‘Trigger’ (includes ‘Stat Continuous Dispensing’),
+        ‘Free’ (‘Continuous Dispensing’ without trigger) and
+        ‘Off’. Returns a reject if the value is not one of the three strings.
 
         (Some tasks can set the state to ‘Off’ without restarting dispensing afterwards.)
       """
@@ -233,7 +224,7 @@ class myClient:
   @middle_invocation_wrapper
   def setLED(self, duration: int, delay : int):
       """
-      Sets the two strobe LED parameters ‘Delay’ (0 to 6500) and Duration (1 to 65000). 
+      Sets the two strobe LED parameters ‘Delay’ (0 to 6500) and Duration (1 to 65000).
       Returns a reject if one of the values is out of range.
       """
       self.send(f"/DoD/do/SetLED?Duration={duration}&Delay={delay}")
@@ -255,13 +246,13 @@ class myClient:
   @middle_invocation_wrapper
   def take_probe(self, channel : int, probe_well : float, volume : float):
       """
-      This endpoint requires the presence of the task ‘ProbeUptake’ (attached). 
+      This endpoint requires the presence of the task ‘ProbeUptake’ (attached).
       If that is not given, the return is not a reject, but nothing happens.
-      The parameters are 
+      The parameters are
 
-        ‘Channel’ (number of nozzle, includes effect as ‘SelectNozzle’), 
-        ‘ProbeWell’ (e.g. A1), Volume (µL). Returns a reject  if ‘Channel’ is not among 
-        ‘Active Nozzles’, Volume is > 250 or 
+        ‘Channel’ (number of nozzle, includes effect as ‘SelectNozzle’),
+        ‘ProbeWell’ (e.g. A1), Volume (µL). Returns a reject  if ‘Channel’ is not among
+        ‘Active Nozzles’, Volume is > 250 or
         ‘ProbeWell’ is not one of the allowed wells for the selected nozzle.
 
       """
