@@ -258,6 +258,110 @@ class myClient:
       """
       self.send(f"/DoD/do/TakeProbe?Channel={channel}&ProbeWell={probe_well}&Volume={volume}")
 
+## API V3 ##
+
+  @middle_invocation_wrapper
+  def get_task_details(self, task_name):
+    '''
+        Returns the content of the tasks that is specified be ‘TaskName’.
+    '''
+    self.send(f"/DoD/get/TaskDetails?TaskName={task_name}")
+
+  @middle_invocation_wrapper
+  def get_drive_range(self):
+    '''
+      Returns the maximum range of each axis (X,Y,Z) in units of µm.
+    '''
+    self.send(f"/DoD/get/DriveRange")
+
+  @middle_invocation_wrapper
+  def set_nozzle_parameters(self, channel):
+    '''
+        Sets the selected nozzle for dispensing and task execution etc.
+        Returns a reject if the channel value is not one of the
+            ‘Activated Nozzles’ (see NozzleStatus (get)).
+    '''
+    self.send(f"/DoD/do/SelectNozzle?Channel={channel}")
+
+  @middle_invocation_wrapper
+  def stop_task(self):
+    '''
+            Stops the running task (and moves).
+    '''
+    self.send(f"/DoD/do/StopTask")
+
+  @middle_invocation_wrapper
+  def take_probe(self, channel, probe_well, volume):
+    '''
+            This endpoint requires the presence of the task ‘ProbeUptake’ (attached).
+            If that is not given, the return is not a reject, but nothing happens.
+            The parameters are ‘Channel’ (number of nozzle, includes effect as
+                                              ‘SelectNozzle’), ‘ProbeWell’ (e.g. A1), Volume (µL).
+
+            Returns a reject if ‘Channel’ is not among ‘Active Nozzles’,
+                Volume is > 250 or ‘ProbeWell’ is not one of the allowed wells
+                for the selected nozzle.
+    '''
+    self.send(f"DoD/do/TakeProbe?Channel={channel}&ProbeWell={probe_well}&Volume={volume}")
+
+  @middle_invocation_wrapper
+  def set_ip_offest(self):
+    '''
+            This endpoint uses the current coordinates for the currently selected
+            nozzle (SelectNozzle) to set the IP position (Nozzle 1) or calculates
+            and sets the IP offsets (Nozzles 2, …).
+            (Note: The ‘Nozzle Offset’ values in the nozzle parameter table are
+             always considered.
+             Changing these would require a readjustment of the IP offsets.)
+            Offsets are rejected if they exceed a maximum of 2 mm.
+            Thus, the selected nozzle must be moved to the IP (InteractionPoint)
+            before requesting SetIPOffset.
+    '''
+    self.send(f"/DoD/do/InteractionPoint")
+
+  @middle_invocation_wrapper
+  def set_humidity(self, value):
+    '''
+        Sets the wanted relative humidity as %rH. Values are integer.
+    '''
+    self.send(f"/DoD/do/SetHumidity?rH={value}")
+
+  @middle_invocation_wrapper
+  def set_cooling_temp(self, temp):
+    '''
+            Sets the temperature of the cooling device.
+            Besides the setting of a °C value (float),
+                there is the option to send the string “dewpoint”,
+                which enables an automatic adjustment.
+    '''
+    self.send(f"/DoD/do/SetCoolingTemp?Temp={temp}")
+
+  @middle_invocation_wrapper
+  def close_dialog(self, reference, selection):
+    '''
+            In situations of “Status” = “Dialog” the endpoint Status provides the
+                dialog’s reference, message text and button labels.
+            (If the response of ‘Button2’ is empty, there is only one selection
+             available, typically with the label ‘OK.).
+            This endpoint allows to close the dialog by specifying the reference and t
+                he selection (“1” or “2”).
+            The reference is individual, incrementing integer for each occurrence
+                of a dialog, it starts a “1” when the device is initialized.
+
+            In case of more than one open dialogs “Status” reports the last one,
+                which is typically the first to be closed.
+            But the remote control can try to close the earlier dialog.
+    '''
+    self.send(f"/DoD/do/CloseDialog?Reference={reference}&Selection={selection}")
+
+  @middle_invocation_wrapper
+  def reset_error(self):
+    '''
+            This endpoint is needed if after closing all (error) dialogs the status 
+            “Error” persists and “ErrorMessage” (header) is not “NA”.
+    '''
+    self.send(f"/DoD/do/ResetError")
+
   '''
   send transmits a formatted HTTP GET request
   it will not check the validity of request
