@@ -39,11 +39,14 @@ class Test_HIL():
     resp = client.get_status()
     expected_keys = [
         'Position',
+        'RunningTask',
+        'Dialog',
         'LastProbe',
         'Humidity',
         'Temperature',
         'BathTemp',
     ]
+
     assert expected_keys == list(resp.RESULTS.keys())
 
   def test_get_position_names(self, capsys):
@@ -122,8 +125,7 @@ class Test_HIL():
   def test_set_led(self, capsys):
     '''
         Set LED to some value then turn off.
-
-        Currently ther is no way to check LED value from the Robot
+        - Currently ther is no way to check LED value from the Robot
     '''
 
     busy_wait(1)
@@ -136,3 +138,35 @@ class Test_HIL():
     assert r.RESULTS == "Rejected"
     # Turn off?
     r = client.setLED(0, 1)
+
+  def test_get_task_details(self, capsys):
+    r = client.get_task_names();
+    print(r)
+
+  def test_get_drive_range(self, capsys):
+    r = client.get_drive_range();
+
+  def test_set_nozzle_parameters(self, capsys):
+    pass
+
+  def test_stop_task(self, capsys):
+    pass
+
+  def test_take_probe(self, capsys):
+    pass
+
+  def test_set_ip_offset(self, capsys):
+    pass
+
+  def test_set_humidity(self, capsys):
+    pass
+
+  def test_set_cooling_temp(self, capsys):
+    pass
+
+  def test_close_dialog(self, capsys):
+    pass
+
+
+
+
