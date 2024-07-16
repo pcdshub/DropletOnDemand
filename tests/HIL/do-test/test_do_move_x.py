@@ -1,23 +1,38 @@
 from tests.HIL.common import *
 import random
 
-
-def test_move_x(do_test_setup):
+def axis_test(axis, endpoint):
   """
     Selects a random position within the drive range and moves to that
     position.
   """
   r = client.get_status()
-  now_x = r.RESULTS['Position']['X']
-  x_range_max = client.get_drive_range().RESULTS['Xmax']
-
-  random_x = random.randint(0, x_range_max)
-  r = client.move_x(random_x)
+  now_pos = r.RESULTS['Position'][axis]
+  axis_range_max = client.get_drive_range().RESULTS[f'{axis}max']
+  random_pos = random.randint(0, axis_range_max)
+  r = client.move_x(random_pos)
   assert r.RESULTS == 'Accepted'
 
-  # wait for move to be done
   busy_wait(5)
   r = client.get_status()
   new_x = r.RESULTS['Position']['X']
+  assert new_x == random_pos
 
-  assert new_x == random_x
+
+def test_move_x(do_test_setup):
+  """
+    Test X
+  """
+  axis_test('X', client.move_x)
+
+def test_move_y(do_test_setup):
+  """
+    Test X
+  """
+  axis_test('Y', client.move_x)
+
+def test_move_z(do_test_setup):
+  """
+    Test X
+  """
+  axis_test('Z', client.move_x)
