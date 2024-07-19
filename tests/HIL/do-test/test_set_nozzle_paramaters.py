@@ -1,13 +1,14 @@
 from tests.HIL.common import *
 from random import choice
 
-def test_set_nozzle_paramaters(do_test_setup):
+def test_set_nozzle_paramaters():
   """
     Selects a nozzle channel that is not activted, this should result in
     'reject'. Then a channel that is active is choosen and this results in
     accepted response.
   """
 
+  client.connect("Test")
   r = client.get_nozzle_status()
   activated_nozzles = get_nozzles_index(r.RESULTS['Activated Nozzles'])
 
@@ -28,7 +29,7 @@ def test_set_nozzle_paramaters(do_test_setup):
 
   # Wait to prevent dissconect to be rejected when nozzle change is happening
   busy_wait(2)
-  r = client.disconnect()
+  client.disconnect()
 
 
 # Helpers ?

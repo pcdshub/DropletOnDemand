@@ -35,8 +35,3 @@ def busy_wait(timeout: int):
 
   return False
 
-@pytest.fixture
-def do_test_setup():
-  busy_wait(5) #check if any tasks are running
-  r = client.connect("Josue") #connect
-

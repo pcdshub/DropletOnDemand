@@ -5,8 +5,8 @@ def test_set_led():
       Set LED to some value then turn off.
       - Currently ther is no way to check LED value from the Robot
   '''
+  r = client.connect("Test")
 
-  busy_wait(1)
   # SET A VALUE
   r = client.setLED(1, 1)
   assert r.RESULTS == "Accepted"
@@ -16,3 +16,5 @@ def test_set_led():
   assert r.RESULTS == "Rejected"
   # Turn off?
   r = client.setLED(0, 1)
+
+  r = client.disconnect()

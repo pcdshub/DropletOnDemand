@@ -6,6 +6,7 @@ def axis_test(axis, endpoint):
     Selects a random position within the drive range and moves to that
     position.
   """
+  r = client.connect("Test")
   r = client.get_status()
   now_pos = r.RESULTS['Position'][axis]
   axis_range_max = client.get_drive_range().RESULTS[f'{axis}max']
@@ -17,9 +18,10 @@ def axis_test(axis, endpoint):
   r = client.get_status()
   new_x = r.RESULTS['Position']['X']
   assert new_x == random_pos
+  r = client.disconnect()
 
 
-def test_move_x(do_test_setup):
+def test_move_x():
   """
     Test X
   """

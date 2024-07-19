@@ -8,9 +8,8 @@ def test_select_nozzle():
   '''
   # WAIT IF SERVER IS BUSY before starting new test
   # Might be a good header to keep in all tests.
-  busy_wait(1)
 
-  client.connect("Josue")
+  client.connect("Test")
   r = client.get_nozzle_status()
 
   # Find active nozzle position
@@ -25,3 +24,4 @@ def test_select_nozzle():
   # Check if new Nozzle positoin was Accepted
   assert r.RESULTS == "Accepted"
   # Check if not active nozzle positoin is choosen the API reponds with Rject
+  client.disconnect()

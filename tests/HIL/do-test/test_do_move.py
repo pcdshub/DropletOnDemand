@@ -2,13 +2,16 @@ from tests.HIL.common import *
 from random import choice
 import pytest
 
-def test_move_do(do_test_setup):
+def test_move_do():
   '''
       Test Move
       Selects random position from position list and moves there.
       Fails if move was not accepted or X,Y,Z ('real positions') are the same
       from inital move.
   '''
+
+  r = client.connect("Test")
+
   r = client.get_position_names()
   position_list = r.RESULTS
   new_position = choice(r.RESULTS)
@@ -26,5 +29,5 @@ def test_move_do(do_test_setup):
   new_real_position = r.RESULTS['PositionReal']
   assert new_real_position != current_real_position
 
-
+  r = client.disconnect()
 

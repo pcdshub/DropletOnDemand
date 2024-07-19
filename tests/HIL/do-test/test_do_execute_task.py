@@ -1,7 +1,7 @@
 from tests.HIL.common import *
 from random import choice
 
-def test_do_execute_task(do_test_setup):
+def test_do_execute_task():
   """
     Execute Washflush_Well, This makes dialog to appead
 
@@ -11,6 +11,8 @@ def test_do_execute_task(do_test_setup):
 
     Also tests close_dialog
   """
+
+  r = client.connect("Test")
 
   # Check if Washflush_Well is in task list
   task_name = 'Washflush_Well'
@@ -33,5 +35,6 @@ def test_do_execute_task(do_test_setup):
   r = client.close_dialog(r.RESULTS['Dialog']['Reference'], 2)
   assert r.RESULTS == 'Accepted'
 
+  r = client.disconnect()
 
 

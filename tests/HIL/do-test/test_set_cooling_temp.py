@@ -5,6 +5,7 @@ def test_set_cooling_temp():
   """
     Set Cooling Temp check if temp is changed
   """
+  r = client.connect("Test")
 
   r = client.get_status()
   print(r)
@@ -25,3 +26,5 @@ def test_set_cooling_temp():
   print(r)
 
   assert temp != new_temp
+
+  r = client.disconnect()
