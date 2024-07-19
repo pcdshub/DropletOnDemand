@@ -76,7 +76,11 @@ class myClient:
     def inner(self, *args):
       logger.info(f"Invoking {func.__name__}")
       func(self, *args)
-      return self.get_response()
+      resp = self.get_response()
+      # TODO: Do something with None response globally
+      # Check if we have a GUI (get_status) that needs to be cleared, May need
+      # to happen per function basis
+      return resp
     return inner
 
   @middle_invocation_wrapper
@@ -232,14 +236,16 @@ class myClient:
   @middle_invocation_wrapper
   def move_y(self, value : float):
       """
-          Same as for X
+          Same as for Y
       """
+      #TODO: handle Dialog, Caputure None, Check if dialog and clear
+      # 
       self.send(f"/DoD/do/MoveY?Y={value}")
 
   @middle_invocation_wrapper
   def move_z(self, value : float):
       """
-          Same as for X
+          Same as for Z
       """
       self.send(f"/DoD/do/MoveZ?Z={value}")
 

@@ -17,9 +17,12 @@ def test_reset_error():
   assert w == False
 
   r = client.get_drive_range()
-  out = r.RESULTS['Ymax'] + 10
+  out = r.RESULTS['Ymax'] + 10 # try to move out of bounds to make error
   r = client.move_y(out)
-  print(r)
+  print(r) #This should print None, for our fix to work
+  '''
+    - Our api is blocking or on Scieion side
+  '''
   r = client.get_status()
   print(r)
 
