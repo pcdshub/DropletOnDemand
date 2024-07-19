@@ -18,7 +18,6 @@ def test_reset_error():
 
   r = client.get_drive_range()
   out = r.RESULTS['Ymax'] + 10
-  print("Hello")
   r = client.move_y(out)
   print(r)
   r = client.get_status()

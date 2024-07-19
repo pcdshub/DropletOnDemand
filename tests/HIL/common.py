@@ -16,6 +16,7 @@ json_handler = JsonFileHandler(supported_json)
 # load configs and launch web server
 json_handler.reload_endpoints()
 
+# Change function to "wait while busy"
 def busy_wait(timeout: int):
   '''
         Busy wait untill timeout value is reached,
@@ -30,6 +31,7 @@ def busy_wait(timeout: int):
     if delta > timeout:
       return True
 
+    time.wait(0.1) #Wait a ms to stop spamming robot
     r = client.get_status()
     delta = time.time() - start
 
