@@ -1,38 +1,45 @@
 from tests.HIL.common import *
 from random import choice
+import time
 
-def test_set_nozzle_paramaters():
+def test_set_nozzle_paramaters_nozzles():
   """
-    Selects a nozzle channel that is not activted, this should result in
-    'reject'. Then a channel that is active is choosen and this results in
-    accepted response.
+  Selects all activated Nozzles, also tries to activate nozzles that are not
+  active leads to Rejected
   """
 
   client.connect("Test")
   r = client.get_nozzle_status()
   activated_nozzles = get_nozzles_index(r.RESULTS['Activated Nozzles'])
-
-  deactivated_nozzles = list(range(8))
+  deactivated_nozzles = list(range(1,8))
   ## remove activated_nozzles
   for i in activated_nozzles:
     deactivated_nozzles.remove(i)
 
   deactivted_nozzle_index = choice(deactivated_nozzles)
 
-  r = client.set_nozzle_parameters(deactivted_nozzle_index)
-  assert r.RESULTS == 'Rejected'
+  r = client.set_nozzle_parameters(','.join(map(str, activated_nozzles)),
+                                  ','.join(map(str, activated_nozzles)),
+                                   79,
+                                   'sciPULSE_ST48',
+                                   120)
 
-
-  activated_nozzle_index = choice(activated_nozzles)
-  r = client.set_nozzle_parameters(activated_nozzle_index)
   assert r.RESULTS == 'Accepted'
 
-  # Wait to prevent dissconect to be rejected when nozzle change is happening
-  busy_wait(2)
+  r = client.get_nozzle_status()
+  assert r.RESULTS['Selected Nozzles'] == activated_nozzles
+
+  r = client.set_nozzle_parameters(','.join(map(str, activated_nozzles)),
+                                  ','.join(map(str, deactivated_nozzles)),
+                                   79,
+                                   'sciPULSE_ST48',
+                                   120)
+
+  assert r.RESULTS == 'Rejected'
   client.disconnect()
 
 
-# Helpers ?
+# Helpers 
 def get_nozzles_index(nozzle_list):
   """
       Returns list of indexes for activated nozzles, empty list of no nozzles are

@@ -31,7 +31,7 @@ def busy_wait(timeout: int):
     if delta > timeout:
       return True
 
-    time.wait(0.1) #Wait a ms to stop spamming robot
+    time.sleep(0.1) #Wait a ms to stop spamming robot
     r = client.get_status()
     delta = time.time() - start
 

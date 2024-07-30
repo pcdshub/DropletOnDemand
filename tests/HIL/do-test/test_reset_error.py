@@ -1,4 +1,5 @@
 from tests.HIL.common import *
+import time
 
 def test_reset_error():
   """
@@ -18,7 +19,11 @@ def test_reset_error():
 
   r = client.get_drive_range()
   out = r.RESULTS['Ymax'] + 10 # try to move out of bounds to make error
-  r = client.move_y(out)
+
+  r = client.move_y(out) 
+  # Some dialog events like moving out of bounds stops HTTP request from being
+  # responed too. Freezing the API control
+
   print(r) #This should print None, for our fix to work
   '''
     - Our api is blocking or on Scieion side

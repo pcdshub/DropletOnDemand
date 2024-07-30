@@ -1,27 +1,64 @@
 from tests.HIL.common import *
 
-def test_dispensing():
-  assert False
+# This can be a decorator
+def d(value):
+  resp = client.execute_task("MoveToCameraStation")
+  wait = busy_wait(10)
+  resp = client.dispensing(value)
+  assert resp.RESULTS == 'Accepted'
+  time.sleep(5);
+  resp = client.dispensing("Off")
+  assert resp.RESULTS == 'Accepted'
+  client.disconnect()
 
+def test_dispensing_free():
   """
-  '''
-      Dispense continuously then stop
-
-      Currently there is no way to get the curren dispensing state trough the
-      API, would be good to check if the state changed in the test. currently
-      not possible
-  '''
-  busy_wait(1)
-  r = client.dispensing('Free')
-  assert r.RESULTS == "Accepted"
-
-  # WAIT untaill robot noy busy
-  # These waits are necessary for commands to be processed when robot is
-  # not busy, otherwise the commands will be rejected
-  busy_wait(1)
-
-  r = client.dispensing('Off')
-
-  assert r.RESULTS == "Accepted"
-
+    Test Free Despensing
   """
+  resp = client.connect("Test")
+  resp = client.execute_task("MoveHome")
+  resp = client.select_nozzle(1)
+
+  d('Free')
+
+def test_dispensing_trigger():
+  """
+    Test Trigger Despensing
+  """
+  resp = client.connect("Test")
+  resp = client.execute_task("MoveHome")
+  resp = client.select_nozzle(1)
+
+  d('Trigger')
+
+def  test_dispensing_more_than_one_nozzle():
+  """
+    WIP: Test Despensing with more than one nozzle
+  """
+  resp = client.connect("Test")
+  resp = client.execute_task("MoveHome")
+  busy_wait(10)
+
+  resp = client.execute_task("MoveToCameraStation")
+  busy_wait(10)
+  resp = client.dispensing('Free')
+  time.sleep(5)
+
+
+  r = client.set_nozzle_parameters( '1,4',
+                                    '1,4',
+                                   79,
+                                   'sciPULSE_ST48',
+                                   120)
+
+  resp = client.dispensing('Free')
+  resp = client.execute_task("MoveToCameraStation")
+  wait = busy_wait(10)
+
+  resp = client.select_nozzle(1)
+  resp = client.dispensing("Off")
+  resp = client.select_nozzle(4)
+  resp = client.dispensing("Off")
+
+
+  client.disconnect()
