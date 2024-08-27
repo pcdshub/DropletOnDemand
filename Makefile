@@ -3,20 +3,22 @@ VERSION=0x03
 
 FTPUSER ?=joshc
 
-TST_FILES_ALL := $(wildcard tests/Test*.py)
-TST_FILES_LOCAL := $(filter-out tests/TestHIL*, $(TST_FILES_ALL))
 
-.PHONY: test
-test:
-	@source venv/bin/activate && pytest --capture=tee-sys -vv $(TST_FILES_LOCAL)
+.PHONY: hil-get-test
+hil-get-test:
+	@source venv/bin/activate && pytest --capture=tee-sys -vv ./tests/HIL/get-test/
 
-.PHONY: test_HIL
-test_HIL:
-	@source venv/bin/activate && pytest --capture=tee-sys -vv tests/TestHIL*
+.PHONY: hil-set-test
+hil-set-test:
+	@source venv/bin/activate && pytest --capture=tee-sys -vv ./tests/HIL/set-test/
 
-.PHONY: test_all
-test_all:
-	@source venv/bin/activate && pytest --capture=tee-sys -vv $(TST_FILES_ALL)
+.PHONY: hil-do-test
+hil-do-test:
+	@source venv/bin/activate && pytest --capture=tee-sys -vv ./tests/HIL/do-test/
+
+.PHONY: hil-all-test
+hil-all-test:
+	@source venv/bin/activate && pytest --capture=tee-sys -vv ./tests/HIL/
 
 .PHONY: update_drops
 update_drops:
@@ -30,6 +32,3 @@ run_test_server:
 transfer_working_files:
 	rsync -zvaP Makefile setup.py tests drops $(FTPUSER)@psbuild-rhel7:~/DoDRobotCode/
 
-.PHONY: sync
-sync:
-	rsync -zvaP --exclude-from='.gitignore' ../DropletDispensingRobot/ psbuild-rhel7:~/DoDRobotCode/

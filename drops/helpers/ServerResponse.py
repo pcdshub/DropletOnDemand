@@ -6,8 +6,12 @@ class ServerResponse:
         Object for parsing incomming HTTPResponse from Robot
     """
     def __init__(self, httObj: HTTPResponse):
-        dat = httObj.read().decode('utf-8')
-        response = json.loads(dat)
+        try:
+            dat = httObj.read().decode('utf-8')
+            response = json.loads(dat)
+        except ValueError:
+            raise Exception(f"Server did not respond in JSON; Something is wrong\n, {dat}")
+
         self.TIME = response["Time"]
         self.STATUS = response["Status"]
         self.LAST_ID = response["LastID"]

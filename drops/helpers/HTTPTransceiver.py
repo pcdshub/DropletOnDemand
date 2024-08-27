@@ -21,7 +21,7 @@ class HTTPTransceiver():
 
     def send(self, endpoint : str):
         logger.info(f"attempting to send: {endpoint}...")
-
+        print(endpoint)
         self.__conn__.request("GET", endpoint)
         logger.info("issued request")
         reply = self.__conn__.getresponse()
@@ -37,5 +37,7 @@ class HTTPTransceiver():
     Pops most recent response from response queue
     '''
     def get_response(self):
-        self.__queue_ready__.acquire()
+      if not self.__queue_ready__.acquire(block=True, timeout=10):
+        return None
+      else:
         return self.__queue__.get()

@@ -76,7 +76,11 @@ class myClient:
     def inner(self, *args):
       logger.info(f"Invoking {func.__name__}")
       func(self, *args)
-      return self.get_response()
+      resp = self.get_response()
+      # TODO: Do something with None response globally
+      # Check if we have a GUI (get_status) that needs to be cleared, May need
+      # to happen per function basis
+      return resp
     return inner
 
   @middle_invocation_wrapper
@@ -232,19 +236,20 @@ class myClient:
   @middle_invocation_wrapper
   def move_y(self, value : float):
       """
-          Same as for X
+          Same as for Y
       """
+      #TODO: handle Dialog, Caputure None, Check if dialog and clear
       self.send(f"/DoD/do/MoveY?Y={value}")
 
   @middle_invocation_wrapper
   def move_z(self, value : float):
       """
-          Same as for X
+          Same as for Z
       """
       self.send(f"/DoD/do/MoveZ?Z={value}")
 
   @middle_invocation_wrapper
-  def take_probe(self, channel : int, probe_well : float, volume : float):
+  def take_probe(self, channel : int, probe_well : str, volume : float):
       """
       This endpoint requires the presence of the task ‘ProbeUptake’ (attached).
       If that is not given, the return is not a reject, but nothing happens.
@@ -275,13 +280,24 @@ class myClient:
     self.send(f"/DoD/get/DriveRange")
 
   @middle_invocation_wrapper
-  def set_nozzle_parameters(self, channel):
+  def set_nozzle_parameters(self,
+                            active_nozzles : str,
+                            selected_nozzles: str,
+                            volts : int,
+                            pulse : str,
+                            frequency : int):
     '''
-        Sets the selected nozzle for dispensing and task execution etc.
-        Returns a reject if the channel value is not one of the
-            ‘Activated Nozzles’ (see NozzleStatus (get)).
+      Sets the list of activate nozzles and of the selected nozzles for
+        operations that work with more than one nozzle.
+      (This overwrites and is overwritten by SelectNozzle, which only sets one nozzle channel.)
+      Both values are strings with commas separating the channel numbers (e.g. “1,2,3”).
+      ‘Volt’ and ‘Freq’ are integers.
+      ‘Pulse’ is read as a string. It is either a integer number or the pulse
+        shape name for sciPULSE channels (from PulseNames).
+
     '''
-    self.send(f"/DoD/do/SelectNozzle?Channel={channel}")
+
+    self.send(f"/DoD/do/SetNozzleParameters?Active={active_nozzles}&Selected={selected_nozzles}&Volt={volts}&Pulse={pulse}&Freq={frequency}")
 
   @middle_invocation_wrapper
   def stop_task(self):
@@ -289,20 +305,6 @@ class myClient:
             Stops the running task (and moves).
     '''
     self.send(f"/DoD/do/StopTask")
-
-  @middle_invocation_wrapper
-  def take_probe(self, channel, probe_well, volume):
-    '''
-            This endpoint requires the presence of the task ‘ProbeUptake’ (attached).
-            If that is not given, the return is not a reject, but nothing happens.
-            The parameters are ‘Channel’ (number of nozzle, includes effect as
-                                              ‘SelectNozzle’), ‘ProbeWell’ (e.g. A1), Volume (µL).
-
-            Returns a reject if ‘Channel’ is not among ‘Active Nozzles’,
-                Volume is > 250 or ‘ProbeWell’ is not one of the allowed wells
-                for the selected nozzle.
-    '''
-    self.send(f"DoD/do/TakeProbe?Channel={channel}&ProbeWell={probe_well}&Volume={volume}")
 
   @middle_invocation_wrapper
   def set_ip_offest(self):
