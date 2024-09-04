@@ -3,7 +3,7 @@ import pprint
 import argparse
 
 from http.client import HTTPConnection
-from multiprocessing import Queue, Semaphore
+from multiprocessing import Queue, Event, Process
 from drops.helpers.ServerResponse import ServerResponse
 from drops.helpers.SupporEndsHandler import SupportedEndsHandler
 from drops.helpers.HTTPTransceiver import HTTPTransceiver
@@ -38,9 +38,18 @@ Can be invoked via command line args or as orchestrated by higher level software
 
 class DropsDriver:
   def __init__(self, ip, port, supported_json="drops/supported.json", reload=True, queue=None, **kwargs):
-    # dto pipelines
+    # HTTP Driver Signalling Mechanism
     self.__queue__ = Queue()
-    self.__queue_ready__ = Semaphore(value=0)
+    self.__queue_ready__ = Event()
+
+    self.message_queue = Queue()
+    self.response_queue = Queue()
+    self.new_response_event = Event()
+
+    self.robot_resp = None
+    self.proc = Process(target=self.work_func, name=self.proc_name) #  TODO: the work function is a bound member function so self should automatically be passed, if not pass self
+    self.proc.start() #  TODO: needs to be joined intellegently
+
     # configure connection object
     self.__IP__ = ip
     self.__PORT__ = port
@@ -62,12 +71,33 @@ class DropsDriver:
       # close network connection
       self.conn.close()
 
+  # Work thread the evaluates when we are clear to send messages to API based on robot status
+  def transmit_worker(self):
+    logging.info("Spawned Driver Transmit Thread")
+    while(True): #  TODO: be more intelligent about this
+      logging.info("Waiting new message from robot")
+      self.new_response_event.wait()
+      logging.info(f"Checking robot status: {self.resp.STATUS['Status']}")
+      status = self.resp.STATUS['Status'] 
+      if (status == 'Idle'):
+        message = self.message_queue.get() # want this block such that if state is idle and we no information to send, we wait till the queue is populated
+        logging.info(f"Transmitting {message}")
+        # Clear to interact with trasceiver object
+        self.transceiver.send(message)
+        self.response_queue.put(self.transceiver.get_response())
+      
+      elif (status == 'Busy'):
+        logging.info(f"Robot currently busy waiting to send, queue length {queue.qsize()}")
+        continue
+      #  TODO: reflect if its neither of these. 
+
+
   '''
   Middleware interaction defintions
   Here we define specific interactions that the machine is capable of fielding
   These actions are exposed as member functions of this driver class. 
   '''
-
+  ## TODO: currently confusing josh that this doesn't take self as an argument
   def middle_invocation_wrapper(func):
     '''
     Define a decorator function to adorn all of these 'high' middleware calls
@@ -75,12 +105,12 @@ class DropsDriver:
     '''
     def inner(self, *args):
       logger.info(f"Invoking {func.__name__}")
-      func(self, *args)
-      resp = self.get_response()
+      func(self, *args) # these functions call send
+      self.resp = self.response_queue.get()
       # TODO: Do something with None response globally
       # Check if we have a GUI (get_status) that needs to be cleared, May need
       # to happen per function basis
-      return resp
+      return self.resp
     return inner
 
   @middle_invocation_wrapper
@@ -343,7 +373,7 @@ class DropsDriver:
     '''
             In situations of “Status” = “Dialog” the endpoint Status provides the
                 dialog’s reference, message text and button labels.
-            (If the response of ‘Button2’ is empty, there is only one selection
+            (If the response of ‘Button2’ is empty, there is only one sellogging.basicConfig(level=logging.DEBUG)ection
              available, typically with the label ‘OK.).
             This endpoint allows to close the dialog by specifying the reference and t
                 he selection (“1” or “2”).
@@ -370,14 +400,15 @@ class DropsDriver:
   it will persist result in a place that can be read... TODO: actually do this
   '''
   def send(self, endpoint):
-    self.transceiver.send(endpoint)
+    self.__queue__.put(endpoint)
+    self.__queue_ready__.set()
     return
 
   '''
   Pops most recent response from response queue
   '''
   def get_response(self):
-    return self.transceiver.get_response()
+    return self.response_queue.get()  # todo pop from message_response_queue
 
 
 if __name__ == "__main__":
