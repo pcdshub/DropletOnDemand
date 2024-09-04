@@ -36,7 +36,7 @@ Can be invoked via command line args or as orchestrated by higher level software
 '''
 
 
-class myClient:
+class DropsDriver:
   def __init__(self, ip, port, supported_json="drops/supported.json", reload=True, queue=None, **kwargs):
     # dto pipelines
     self.__queue__ = Queue()
@@ -383,8 +383,8 @@ class myClient:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     # init connection to client
-    client = myClient(ip="172.21.148.101", port=9999)
-    #client = myClient(ip="127.0.0.1", port=8081)
+    client = DropsDriver(ip="172.21.148.101", port=9999)
+    #client = DropsDriver(ip="127.0.0.1", port=8081)
     # check validity of user specified arg
     args = parse_arguments(client)
     # transmit command
