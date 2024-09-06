@@ -1,7 +1,7 @@
 import time
 import pytest
 
-from drops.DropsDriver import myClient
+from drops.DropsDriver import DropsDriver
 from drops.helpers.JsonFileHandler import JsonFileHandler
 from drops.helpers.ServerResponse import ServerResponse
 
@@ -9,7 +9,7 @@ from drops.helpers.ServerResponse import ServerResponse
 ip = "172.21.148.101"
 port = 9999
 supported_json = "drops/supported.json"
-client = myClient(ip=ip, port=port, supported_json=supported_json, reload=False)
+client = DropsDriver(ip=ip, port=port, supported_json=supported_json, reload=False)
 
 # create config parser handler
 json_handler = JsonFileHandler(supported_json)

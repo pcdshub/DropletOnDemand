@@ -1,6 +1,6 @@
 import json
 
-from drops.DropsDriver import myClient
+from drops.DropsDriver import DropsDriver
 from testServerSpawner import ServerSpawner
 from drops.helpers.JsonFileHandler import JsonFileHandler
 
@@ -10,7 +10,7 @@ supported_json = "drops/supported.json"
 
 # pytest encourages this pattern, apologies.
 # instantiate HTTP client
-client = myClient(ip=ip, port=port, supported_json=supported_json, reload=False)
+client = DropsDriver(ip=ip, port=port, supported_json=supported_json, reload=False)
 # spawn test backend
 web_server = ServerSpawner(ip, port, supported_json)
 # create config parser handler

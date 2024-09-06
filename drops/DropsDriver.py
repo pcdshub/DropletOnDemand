@@ -39,8 +39,15 @@ Can be invoked via command line args or as orchestrated by higher level software
 '''
 
 
-class myClient:
-  def __init__(self, ip, port, supported_json="drops/supported.json", reload=True, queue=None, **kwargs):
+class DropsDriver:
+  def __init__(self, 
+               ip:str, 
+               port:int, 
+               supported_json:str="drops/supported.json", 
+               reload:bool=True, 
+               queue:Queue=None, 
+               should_api_calls_block:bool=False
+               **kwargs):
     # dto pipelines
     self.__queue__ = Queue()
     self.__queue_ready__ = Semaphore(value=0)
@@ -61,6 +68,8 @@ class myClient:
     self.supported_ends = lambda : self.supported_ends_handler.get_endpoints()
     pprint.pprint(self.supported_ends())
 
+    self.should_api_calls_block = should_api_calls_block
+
   def __del__(self):
       # close network connection
       self.conn.close()
@@ -70,41 +79,35 @@ class myClient:
   Here we define specific interactions that the machine is capable of fielding
   These actions are exposed as member functions of this driver class. 
   '''
-  def middle_invocation_wrapper(blocking=False)
-    def wrapper_func(func):
-      '''
-      Define a decorator function to adorn all of these 'high' middleware calls
-      Logs what functions is being called and returns the response. 
-      '''
-      @wraps(func) # should pass func name
-      def wrapped_func_that_gets_and_returns_response(self, *args):
-        logger.info(f"Invoking {func.__name__}")
-        func(self, *args)
-        resp = self.get_response()
+  def middle_invocation_wrapper(func):
+    '''
+    Define a decorator function to adorn all of these 'high' middleware calls
+    Logs what functions is being called and returns the response. 
+    '''
+    @wraps(func) # should pass func name
+    def wrapped_func_that_gets_and_returns_response(self, *args):
+      logger.info(f"Invoking {func.__name__}")
+      func(self, *args)
+      resp = self.get_response()
 
-        if blocking == True:
-          logging.info("Calling with blocking set to true")
-          status = resp.STATUS['Status'] 
-          while (status != 'Idle'):
-            logging.info(f"Status is: {status}")
-            time.sleep(.5)
-            status = self.get_response()
-          logging.info(f"{func.__name__} returned")
+      if self.should_api_calls_block == True:
+        logging.info("Calling with blocking set to true")
+        status = resp.STATUS['Status'] 
+        while (status != 'Idle'):
+          logging.info(f"Status is: {status}")
+          time.sleep(.5)
+          status = self.get_response()
+        logging.info(f"{func.__name__} returned")
 
-        # TODO: Do something with None response globally
-        # Check if we have a GUI (get_status) that needs to be cleared, May need
-        # to happen per function basis
-        return resp
-      return wrapped_func_that_gets_and_returns_response
-    return wrapper_func
+      # TODO: Do something with None response globally
+      # Check if we have a GUI (get_status) that needs to be cleared, May need
+      # to happen per function basis
+      return resp
+    return wrapped_func_that_gets_and_returns_response
 
-  def middle_invocation_wrapper_block_until_idle(func):
-    def wrap_func_that_blocks_until_wrapped_func_reply_status_is_idle(*args, **kwargs):
-      logging.info("Calling ")
-      resp = func()
-      if resp.STATUS['Status'] != 'Idle':
-        logging.info(f"Response: ")
 
+  def set_should_api_calls_block(should_block: bool):
+    self.should_api_calls_block = should_block 
 
   @middle_invocation_wrapper
   def connect(self, user : str):
@@ -406,8 +409,8 @@ class myClient:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     # init connection to client
-    client = myClient(ip="172.21.148.101", port=9999)
-    #client = myClient(ip="127.0.0.1", port=8081)
+    client = DropsDriver(ip="172.21.148.101", port=9999)
+    #client = DropsDriver(ip="127.0.0.1", port=8081)
     # check validity of user specified arg
     args = parse_arguments(client)
     # transmit command
