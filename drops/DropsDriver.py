@@ -3,10 +3,12 @@ import pprint
 import argparse
 
 from http.client import HTTPConnection
-from multiprocessing import Queue, Semaphore
+from multiprocessing import Queue, Semaphore, Process
+from threading import Thread
 from drops.helpers.ServerResponse import ServerResponse
 from drops.helpers.SupporEndsHandler import SupportedEndsHandler
 from drops.helpers.HTTPTransceiver import HTTPTransceiver
+from drops.helpers.Worker import DodRobotWorker, DodRobotEvent
 
 logger = logging.getLogger(__name__)
 
@@ -38,19 +40,23 @@ Can be invoked via command line args or as orchestrated by higher level software
 
 class myClient:
   def __init__(self, ip, port, supported_json="drops/supported.json", reload=True, queue=None, **kwargs):
-    # dto pipelines
-    self.__queue__ = Queue()
-    self.__queue_ready__ = Semaphore(value=0)
     # configure connection object
     self.__IP__ = ip
     self.__PORT__ = port
     self.conn = HTTPConnection(host=self.__IP__, port=self.__PORT__)
-    self.transceiver = HTTPTransceiver(self.conn, self.__queue__, self.__queue_ready__)
     logger.info(f"Connected to ip: {ip} port: {port}")
+
+    # Handles sending and getting responses from Robot
+    self.__queue__ = Queue()
+    self.__queue_ready__ = Semaphore(value=0)
+    self.transceiver = HTTPTransceiver(self.conn, 
+                                       self.__queue__, 
+                                       self.__queue_ready__)
 
     # configuration persitence, updating
     self.supported_ends_handler = SupportedEndsHandler(supported_json,
                                                        self.conn)
+
     if (reload):
       self.supported_ends_handler.reload_all()
 
@@ -58,9 +64,18 @@ class myClient:
     self.supported_ends = lambda : self.supported_ends_handler.get_endpoints()
     pprint.pprint(self.supported_ends())
 
+    # worker thread used for handleing driver state machine
+    self.in_qeue = Queue() 
+    self.out_qeue = Queue() # might need to be a stack
+    self.worker =  DodRobotWorker(self.in_qeue, self.out_qeue, self.transceiver)
+    self.worker_process = Process(target=self.worker.work_func)
+    self.worker_process.start()
+
+
   def __del__(self):
       # close network connection
       self.conn.close()
+      self.worker_process.join()
 
   '''
   Middleware interaction defintions
@@ -73,14 +88,17 @@ class myClient:
     Define a decorator function to adorn all of these 'high' middleware calls
     Logs what functions is being called and returns the response. 
     '''
-    def inner(self, *args):
+    def inner(self, blocking=True, *args):
       logger.info(f"Invoking {func.__name__}")
       func(self, *args)
-      resp = self.get_response()
+      if blocking:
+          # NOTE: It is possible to do not blocking request, then in next
+          # blocking request receive from previous not blocking request
+          return self.get_response(blocking) # return Items when we have them
+      return None # can check later
       # TODO: Do something with None response globally
       # Check if we have a GUI (get_status) that needs to be cleared, May need
       # to happen per function basis
-      return resp
     return inner
 
   @middle_invocation_wrapper
@@ -369,15 +387,21 @@ class myClient:
   it will not check the validity of request
   it will persist result in a place that can be read... TODO: actually do this
   '''
-  def send(self, endpoint):
-    self.transceiver.send(endpoint)
-    return
+  def send(self, endpoint, blocking=True):
+    #self.transceiver.send(endpoint)
+    send_event = DodRobotEvent(endpoint)
+    self.in_qeue.put(send_event)
 
   '''
   Pops most recent response from response queue
   '''
-  def get_response(self):
-    return self.transceiver.get_response()
+  def get_response(self, blocking=True):
+    #return self.transceiver.get_response()
+    if self.out_qeue.qsize() > 0:
+        return self.out_qeue.get(block=blocking)
+    else:
+        return None
+    
 
 
 if __name__ == "__main__":
