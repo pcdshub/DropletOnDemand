@@ -4,7 +4,6 @@ import argparse
 
 from http.client import HTTPConnection
 from multiprocessing import Queue, Semaphore, Process
-from threading import Thread
 from drops.helpers.ServerResponse import ServerResponse
 from drops.helpers.SupporEndsHandler import SupportedEndsHandler
 from drops.helpers.HTTPTransceiver import HTTPTransceiver
@@ -64,7 +63,7 @@ class myClient:
     self.supported_ends = lambda : self.supported_ends_handler.get_endpoints()
     pprint.pprint(self.supported_ends())
 
-    # worker thread used for handleing driver state machine
+    # worker process used for handleing driver state machine
     self.in_qeue = Queue() 
     self.out_qeue = Queue() # might need to be a stack
     self.worker =  DodRobotWorker(self.in_qeue, self.out_qeue, self.transceiver)
@@ -96,7 +95,10 @@ class myClient:
       #Keep original functionality
       if blocking:
           # NOTE: It is possible to do not blocking request, then in next
-          # blocking request receive from previous not blocking request
+          # blocking request receive from previous not blocking request.
+          # There is a time field in the Event fom Qs we can check and only
+          # return the out event that matches the in event time, this would
+          # requre the time not updated in the worker thread
           return self.out_qeue.get(block=True) # return item from Q w/ blocking
       return None # can check later
       # TODO: Do something with None response globally

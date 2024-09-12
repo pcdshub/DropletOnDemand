@@ -58,7 +58,7 @@ class DodRobotWorker():
                     # we still got items in queue
                     self.CURRENT_STATE = DodRobotWorkerStates.ROBOT_DO
 
-
+                time.sleep(0.1)
             elif self.CURRENT_STATE == DodRobotWorkerStates.ROBOT_DO:
                 # A thought, We can add some functionality to retry the command
                 # if something does not go as planned?
@@ -105,7 +105,7 @@ class DodRobotWorker():
             elif self.CURRENT_STATE == DodRobotWorkerStates.ERROR:
                 # TODO
                 print("IN EROR")
-                if self.do_next.valu:
+                if self.do_next.value:
                     #Just keep going
                     self.CURRENT_STATE = DodRobotWorkerStates.KEEP_ALIVE
 
