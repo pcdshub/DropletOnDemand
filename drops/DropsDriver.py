@@ -75,6 +75,7 @@ class myClient:
   def __del__(self):
       # close network connection
       self.conn.close()
+      self.worker.do_work.value = False
       self.worker_process.join()
 
   '''
@@ -91,10 +92,12 @@ class myClient:
     def inner(self, blocking=True, *args):
       logger.info(f"Invoking {func.__name__}")
       func(self, *args)
+
+      #Keep original functionality
       if blocking:
           # NOTE: It is possible to do not blocking request, then in next
           # blocking request receive from previous not blocking request
-          return self.get_response(blocking) # return Items when we have them
+          return self.out_qeue.get(block=True) # return item from Q w/ blocking
       return None # can check later
       # TODO: Do something with None response globally
       # Check if we have a GUI (get_status) that needs to be cleared, May need
@@ -395,10 +398,10 @@ class myClient:
   '''
   Pops most recent response from response queue
   '''
-  def get_response(self, blocking=True):
-    #return self.transceiver.get_response()
+  def get_response(self):
+    # prevent from blocking when there is nothing to get from Q
     if self.out_qeue.qsize() > 0:
-        return self.out_qeue.get(block=blocking)
+        return self.out_qeue.get()
     else:
         return None
     

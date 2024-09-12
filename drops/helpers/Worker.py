@@ -38,21 +38,26 @@ class DodRobotWorker():
         self.timeout = 100 # command timeout in seconds
         self.CURRENT_STATE = DodRobotWorkerStates.KEEP_ALIVE
         self.LAST_REQ = None
+        self.timer_start = time.perf_counter()
 
     def work_func(self):
         while(self.do_work.value):
             if self.CURRENT_STATE == DodRobotWorkerStates.KEEP_ALIVE:
                 # KEEP CONNECTION ALIVE
                 # To keep connection alive, just prob status
-                self.transceiver.send('/DoD/get/Status')
-                time.sleep(0.1)
-                r = self.transceiver.get_response() # Might be good to log
+
+                delta = time.perf_counter() - self.timer_start
+                
+                if delta >= 1: # keep alive request every second
+                    self.timer_start = time.perf_counter()
+                    delta = 0
+                    self.transceiver.send('/DoD/get/Status')
+                    r = self.transceiver.get_response() # Might be good to log
 
                 if self.in_q.qsize() > 0:
                     # we still got items in queue
                     self.CURRENT_STATE = DodRobotWorkerStates.ROBOT_DO
 
-                time.sleep(1)
 
             elif self.CURRENT_STATE == DodRobotWorkerStates.ROBOT_DO:
                 # A thought, We can add some functionality to retry the command
@@ -60,7 +65,10 @@ class DodRobotWorker():
                 event = self.in_q.get()
 
                 self.transceiver.send(event.endpoint)
-                robot_response = self.transceiver.get_response()
+                try:
+                    robot_response = self.transceiver.get_response()
+                except Exception as e:
+                    self.CURRENT_STATE = DodRobotWorkerStates.ERROR
 
                 # DO some busy waiting for robot to finish
                 start = time.time()
