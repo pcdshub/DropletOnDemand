@@ -1,0 +1,14 @@
+# default group
+* @pcdshub/sample-delivery-sme 
+
+# language-specific group(s)
+## PYTHON files
+*.py @pcdshub/python-reviewers @pcdshub/sample-delivery-sme 
+*.pyi @pcdshub/python-reviewers @pcdshub/sample-delivery-sme 
+*.pyc @pcdshub/python-reviewers @pcdshub/sample-delivery-sme 
+*.pyw @pcdshub/python-reviewers @pcdshub/sample-delivery-sme 
+*.pyx @pcdshub/python-reviewers @pcdshub/sample-delivery-sme 
+*.pyd @pcdshub/python-reviewers @pcdshub/sample-delivery-sme 
+
+# github folder holds administrative files
+.github/** @pcdshub/software-admin
