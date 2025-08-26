@@ -21,7 +21,6 @@ class HTTPTransceiver():
 
     def send(self, endpoint : str):
         logger.info(f"attempting to send: {endpoint}...")
-        print(endpoint)
         self.__conn__.request("GET", endpoint)
         logger.info("issued request")
         reply = self.__conn__.getresponse()

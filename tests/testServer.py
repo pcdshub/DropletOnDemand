@@ -26,8 +26,13 @@ class MyServer(BaseHTTPRequestHandler):
 
         endpointIndex = 0
         for endpoint in endpoints:
-            capabilities[endpoint["API"]] = endpointIndex
+            # onlt get command without args
+            parsed_command = endpoint["API"].split('?').pop(0)
+            capabilities[parsed_command] = endpointIndex
             endpointIndex = endpointIndex + 1
+
+        print(command)
+        print(capabilities.keys())
 
         if command not in capabilities.keys():
             fd.close()
