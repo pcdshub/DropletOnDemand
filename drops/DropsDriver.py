@@ -1,6 +1,7 @@
 import logging
 import pprint
 import argparse
+import os
 
 from http.client import HTTPConnection
 from multiprocessing import Queue, Semaphore
@@ -9,6 +10,8 @@ from drops.helpers.SupporEndsHandler import SupportedEndsHandler
 from drops.helpers.HTTPTransceiver import HTTPTransceiver
 
 logger = logging.getLogger(__name__)
+
+DEFUALT_SUPPORTED_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "supported.json")
 
 
 def parse_arguments(obj):
@@ -37,7 +40,7 @@ Can be invoked via command line args or as orchestrated by higher level software
 
 
 class myClient:
-  def __init__(self, ip, port, supported_json="drops/supported.json", reload=True, queue=None, **kwargs):
+  def __init__(self, ip, port, supported_json=DEFUALT_SUPPORTED_JSON, reload=True, queue=None, **kwargs):
     # dto pipelines
     self.__queue__ = Queue()
     self.__queue_ready__ = Semaphore(value=0)
